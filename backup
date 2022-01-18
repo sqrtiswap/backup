@@ -38,8 +38,9 @@ backup() {
 check_filenr() {
 	echo "Check file number:"
 	for d in "${dirlist[@]}"; do
-		echo "$d: $(find "$HOME"/"$d" -type f | wc -l)" >> "$HOME"/checkfilenumber-src.txt
-		echo "$d: $(find "$HOME"/mnt/"$d" -type f | wc -l)" >> "$HOME"/checkfilenumber-dest.txt
+		_dir=$(echo "$d" | sed 's/.mozilla\///')
+		echo "${_dir}: $(find "$HOME"/"$d" -type f | wc -l)" >> "$HOME"/checkfilenumber-src.txt
+		echo "${_dir}: $(find "$HOME"/mnt/"${_dir}" -type f | wc -l)" >> "$HOME"/checkfilenumber-dest.txt
 	done
 	diff "$HOME"/checkfilenumber-src.txt "$HOME"/checkfilenumber-dest.txt \
 		&& echo "\033[32m--- file number is consistent. ---\033[0m" \
@@ -110,6 +111,7 @@ collect_data() {
 		&& echo "----> [3/6] todo data collected." \
 		|| exit 1
 
+	cd ~/.opm && bitrot || exit 1
 	cp -R \
 		~/.gnupg \
 		~/.opm \
