@@ -26,11 +26,24 @@ i=0
 backup() {
 	for d in "${dirlist[@]}"; do
 		i=$((i+1))
-		if [ "$d" = "Pictures" ] || [ "$d" = "Wichtig" ] || [ "$d" = "documents" ] || [ "$d" = "media" ] ; then
-			cd "$HOME"/"$d" && bitrot || exit 1
-		fi
 		"$RSYNC" -av --delete "$HOME"/"$d" "$HOME"/mnt/ \
 			&& echo "\033[32m--- synced $i/${nr} ---\033[0m" \
+			|| exit 1
+	done
+}
+
+check_bitrot() {
+	set -A checklist Pictures \
+		Wichtig \
+		documents \
+		media \
+		.opm
+	nr=${#checklist[@]}
+	i=0
+	for d in "${checklist[@]}"; do
+		i=$((i+1))
+		cd "$HOME"/"$d" && bitrot \
+			&& echo "\033[32m--- checked bitrot $i/${nr} ($HOME/$d) ---\033[0m" \
 			|| exit 1
 	done
 }
@@ -111,7 +124,6 @@ collect_data() {
 		&& echo "----> [3/6] todo data collected." \
 		|| exit 1
 
-	cd ~/.opm && bitrot || exit 1
 	cp -R \
 		~/.gnupg \
 		~/.opm \
@@ -218,6 +230,7 @@ prepare_collecting_dotfiles() {
 usage() {
 	echo "backup has options:
 all		-> backup all directories
+bitrot		-> check for bitrot in selected directories
 dotfiles	-> collect dotfiles"
 exit 1
 }
@@ -227,6 +240,9 @@ all*)
 	lazyscript keyring
 	backup
 	check_filenr
+	;;
+bitrot*)
+	check_bitrot
 	;;
 dotfiles*)
 	prepare_collecting_dotfiles && collect_dotfiles
