@@ -35,8 +35,7 @@ check_bitrot() {
 	set -A checklist Pictures \
 		Wichtig \
 		documents \
-		media \
-		.opm
+		media
 	nr=${#checklist[@]}
 	i=0
 	for d in "${checklist[@]}"; do
@@ -124,9 +123,8 @@ collect_data() {
 
 	cp -R \
 		~/.gnupg \
-		~/.opm \
 		"${_datadir}" \
-		&& echo "----> [4/6] pw mngmt collected." \
+		&& echo "----> [4/6] gpg collected." \
 		|| exit 1
 
 	mv ~/Downloads/bookmarks.html "${_datadir}"/ \
