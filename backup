@@ -127,8 +127,8 @@ collect_data() {
 		&& echo "----> [4/6] gpg collected." \
 		|| exit 1
 
-	mv ~/Downloads/bookmarks.html "${_datadir}"/ \
-		&& echo "----> [5/6] bookmarks collected." \
+	mv ~/Downloads/bookmarks.html "${_datadir}"/torbookmarks.html \
+		&& echo "----> [5/6] torbookmarks collected." \
 		|| exit 1
 
 	notmuch dump --output="${_datadir}"/notmuch-dump.txt \
@@ -210,16 +210,19 @@ collect_dotfiles() {
 	#set +e
 }
 
+prepare_backup() {
+	if pgrep -q mutt ; then
+		echo "mutt is still running." && exit 1
+	fi
+}
+
 prepare_collecting_dotfiles() {
 	if pgrep -q mutt ; then
-		echo "mutt is still running."
+		echo "mutt is still running." && exit 1
 	else
 		_dotdir="$HOME"/dotfiles/"$(date +%F)"
-		if [ -d "${_dotdir}" ] ; then
-			echo "${_dotdir} already exists. Do some clean-up!" && exit 1
-		else
-			lazyscript keyring
-		fi
+		[ -d "${_dotdir}" ] \
+			&& echo "${_dotdir} already exists. Do some clean-up!" && exit 1
 	fi
 }
 
@@ -233,7 +236,7 @@ exit 1
 
 case $1 in
 all*)
-	lazyscript keyring
+	prepare backup
 	backup
 	check_filenr
 	;;
@@ -241,7 +244,8 @@ bitrot*)
 	check_bitrot
 	;;
 dotfiles*)
-	prepare_collecting_dotfiles && collect_dotfiles
+	prepare_collecting_dotfiles
+	collect_dotfiles
 	;;
 *)
 	usage
