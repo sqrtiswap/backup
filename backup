@@ -236,7 +236,7 @@ exit 1
 
 case $1 in
 all*)
-	prepare backup
+	prepare_backup
 	backup
 	check_filenr
 	;;
