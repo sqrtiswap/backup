@@ -94,10 +94,12 @@ collect_config() {
 		&& echo "----> [4/5] plan9port configs collected." \
 		|| exit 1
 
-	mkdir "${_configdir}"/.cache \
-		&& cp -R ~/.cache/mutt "${_configdir}"/.cache/ \
-		&& echo "----> [5/5] ~/.cache collected." \
-		|| exit 1
+	if [ -d "$HOME"/.cache/mutt ] ; then
+		mkdir "${_configdir}"/.cache \
+			&& cp -R ~/.cache/mutt "${_configdir}"/.cache/ \
+			&& echo "----> [5/5] ~/.cache collected." \
+			|| exit 1
+	fi
 }
 
 collect_data() {
