@@ -6,29 +6,38 @@ else
 	RSYNC='openrsync'
 fi
 
-set -A dirlist Downloads \
-	Emails \
-	Pictures \
-	Wichtig \
-	bin \
-	documents \
-	dotfiles \
-	inbox \
-	man \
-	media \
-	mbox \
-	sources
-
-nr=${#dirlist[@]}
-i=0
-
 backup() {
+	_mntpoint="$2"
+
+	set -A dirlist Downloads \
+		Emails \
+		Pictures \
+		Wichtig \
+		bin \
+		documents \
+		dotfiles \
+		inbox \
+		man \
+		media \
+		sources
+
+	nr=${#dirlist[@]}
+	i=0
+
 	for d in "${dirlist[@]}"; do
 		i=$((i+1))
-		"$RSYNC" -av --delete "$HOME"/"$d" "$HOME"/mnt/ \
+		"$RSYNC" -av --delete "$HOME"/"$d" "${_mntpoint}" \
 			&& echo "\033[32m--- synced $i/${nr} ---\033[0m" \
 			|| exit 1
+		echo "$d: $(find "$HOME"/"$d" -type f | wc -l)" >> "$HOME"/checkfilenumber-src.txt
+		echo "$d: $(find "${_mntpoint}"/"$d" -type f | wc -l)" >> "$HOME"/checkfilenumber-dest.txt
 	done
+	[ -f "$HOME"/mbox ] && cp "$HOME"/mbox "${_mntpoint}"
+
+	echo "Check file number:"
+	diff "$HOME"/checkfilenumber-src.txt "$HOME"/checkfilenumber-dest.txt \
+		&& echo "\033[32m--- file number is consistent. ---\033[0m" \
+		&& rm "$HOME"/checkfilenumber-*.txt
 }
 
 check_bitrot() {
@@ -44,134 +53,6 @@ check_bitrot() {
 			&& echo "\033[32m--- checked bitrot $i/${nr} ($HOME/$d) ---\033[0m" \
 			|| exit 1
 	done
-}
-
-check_filenr() {
-	echo "Check file number:"
-	for d in "${dirlist[@]}"; do
-		echo "$d: $(find "$HOME"/"$d" -type f | wc -l)" >> "$HOME"/checkfilenumber-src.txt
-		echo "$d: $(find "$HOME"/mnt/"$d" -type f | wc -l)" >> "$HOME"/checkfilenumber-dest.txt
-	done
-	diff "$HOME"/checkfilenumber-src.txt "$HOME"/checkfilenumber-dest.txt \
-		&& echo "\033[32m--- file number is consistent. ---\033[0m" \
-		&& rm "$HOME"/checkfilenumber-*.txt
-}
-
-collect_config() {
-	echo "Start collecting configurations:"
-	_configdir="${_dotdir}"/configurations
-	mkdir -p "${_configdir}" \
-		&& echo "----> [1/5] ${_configdir} created." \
-		|| exit 1
-
-	cp -R ~/.config "${_configdir}" \
-		&& echo "----> [2/5] ~/.config/ collected." \
-		|| exit 1
-
-	cp -R \
-		~/.Xdefaults \
-		~/.Xresources \
-		~/.cshrc \
-		~/.cvsrc \
-		~/.cwmrc \
-		~/.exrc \
-		~/.fvwmrc \
-		~/.getmail \
-		~/.kshrc \
-		~/.ksh_completions \
-		~/.login \
-		~/.mailrc \
-		~/.mbsyncrc \
-		~/.notmuch-config \
-		~/.profile \
-		~/.xsession \
-		~/.tmux.conf \
-		"${_configdir}" \
-		&& echo "----> [3/5] ~/. collected." \
-		|| exit 1
-
-	cp ~/default-acme.dump "${_configdir}"/ \
-		&& echo "----> [4/5] plan9port configs collected." \
-		|| exit 1
-
-	if [ -d "$HOME"/.cache/mutt ] ; then
-		mkdir "${_configdir}"/.cache \
-			&& cp -R ~/.cache/mutt "${_configdir}"/.cache/ \
-			&& echo "----> [5/5] ~/.cache collected." \
-			|| exit 1
-	fi
-}
-
-collect_data() {
-	echo "Start collecting data:"
-	_datadir="${_dotdir}"/data
-	mkdir "${_datadir}" \
-		&& echo "----> [1/6] ${_datadir} created." \
-		|| exit 1
-
-	cp -R \
-		~/.reminders \
-		~/.tkremindrc \
-		~/.include-remind \
-		"${_datadir}"/ \
-		&& echo "----> [2/6] calendar data collected." \
-		|| exit 1
-
-	nr_of_reports="$(grep -c "$(date +%F)" "$TODODIR"/report.txt)"
-	[ "${nr_of_reports}" -lt 1 ] && todo -q report
-	cp -R "$TODODIR" "${_datadir}" \
-		&& echo "----> [3/6] todo data collected." \
-		|| exit 1
-
-	cp -R \
-		~/.gnupg \
-		"${_datadir}" \
-		&& echo "----> [4/6] gpg collected." \
-		|| exit 1
-
-	mv ~/Downloads/bookmarks.html "${_datadir}"/torbookmarks.html \
-		&& echo "----> [5/6] torbookmarks collected." \
-		|| exit 1
-
-	notmuch dump --output="${_datadir}"/notmuch-dump.txt \
-		&& echo "----> [6/6] notmuch dumped." \
-		|| exit 1
-}
-
-collect_privconfig() {
-	echo "Start collecting privileged configurations:"
-	_privdir="${_dotdir}"/PRIVILEGED
-	mkdir -p "${_privdir}"/etc/X11/xenodm/ \
-		&& echo "----> [1/4] ${_privdir} created." \
-		|| exit 1
-
-	doas cp \
-		/etc/freshclam.conf \
-		/etc/doas.conf \
-		/etc/fstab \
-		/etc/login.conf \
-		/etc/man.conf \
-		/etc/mixerctl.conf \
-		/etc/ntpd.conf \
-		/etc/sndioctl.conf \
-		/etc/sysclean.ignore \
-		/etc/wpa_supplicant.conf \
-		/etc/wsconsctl.conf \
-		"${_privdir}"/etc/ \
-		&& echo "----> [2/4] /etc/ collected." \
-		|| exit 1
-
-	doas cp \
-		/etc/X11/xenodm/Xresources* \
-		/etc/X11/xenodm/Xsetup_0 \
-		/etc/X11/xenodm/GiveConsole \
-		"${_privdir}"/etc/X11/xenodm/ \
-		&& echo "----> [3/4] /etc/X11/xenodm/ collected." \
-		|| exit 1
-
-	doas chown -R alexander:alexander "${_privdir}" \
-		&& echo "----> [4/4] changed ownership of privileged configs." \
-		|| exit 1
 }
 
 scan_collection() {
@@ -190,25 +71,28 @@ collect_dotfiles() {
 		&& echo "${_good}[1/6] ----- Created ${_dotdir}.${_rset}" \
 		|| echo "${_fail}[1/6] ----- Creating ${_dotdir} failed.${_rset}"
 
-	pkg_info -tz >> "${_dotdir}"/installed_packages.txt \
-		&& echo "${_good}[2/6] ----- Created list of installed packages.${_rset}" \
-		|| echo "${_fail}[2/6] ----- Creating list of installed packages failed.${_rset}"
+	_backupscripts="$HOME"/sources/backup
 
-	collect_config \
-		&& echo "${_good}[3/6] ----- Collected configurations.${_rset}" \
-		|| echo "${_fail}[3/6] ----- Collecting configurations failed.${_rset}"
+	"${_backupscripts}"/collect_config \
+		&& echo "${_good}[2/6] ----- Collected configurations.${_rset}" \
+		|| echo "${_fail}[2/6] ----- Collecting configurations failed.${_rset}"
 
-	collect_data \
-		&& echo "${_good}[4/6] ----- Collected data.${_rset}" \
-		|| echo "${_fail}[4/6] ----- Collecting data failed.${_rset}"
+	"${_backupscripts}"/collect_privconfig \
+		&& echo "${_good}[3/6] ----- Collected privileged configurations.${_rset}" \
+		|| echo "${_fail}[3/6] ----- Collecting privileged configurations failed.${_rset}"
 
-	collect_privconfig \
-		&& echo "${_good}[5/6] ----- Collected privileged configurations.${_rset}" \
-		|| echo "${_fail}[5/6] ----- Collecting privileged configurations failed.${_rset}"
+	"${_backupscripts}"/collect_installs \
+		&& echo "${_good}[4/6] ----- Created list of installed packages.${_rset}" \
+		|| echo "${_fail}[4/6] ----- Creating list of installed packages failed.${_rset}"
+
+	"${_backupscripts}"/collect_data \
+		&& echo "${_good}[5/6] ----- Collected data.${_rset}" \
+		|| echo "${_fail}[5/6] ----- Collecting data failed.${_rset}"
 
 	scan_collection \
 		&& echo "${_good}[6/6] ----- Clamscan: No infected files found.${_rset}" \
 		|| echo "${_fail}[6/6] ----- Clamscan: Infected files found.${_rset}"
+
 	#set +e
 }
 
@@ -230,22 +114,21 @@ prepare_collecting_dotfiles() {
 
 usage() {
 	echo "backup has options:
-all		-> backup all directories
+all	[dir]	-> backup all directories to [dir]
 bitrot		-> check for bitrot in selected directories
 dotfiles	-> collect dotfiles"
 exit 1
 }
 
 case $1 in
-all*)
+all)
 	prepare_backup
-	backup
-	check_filenr
+	backup "$@"
 	;;
-bitrot*)
+bitrot)
 	check_bitrot
 	;;
-dotfiles*)
+dotfiles)
 	prepare_collecting_dotfiles
 	collect_dotfiles
 	;;
