@@ -6,6 +6,12 @@ else
 	RSYNC='openrsync'
 fi
 
+if command -v doas > /dev/null ; then
+	_doas=doas
+else
+	_doas=sudo
+fi
+
 backup() {
 	if [ -n "$2" ] ; then
 		_mntpoint="$2"
@@ -61,11 +67,11 @@ check_bitrot() {
 
 scan_collection() {
 	echo "Scan collected dotfiles:"
-	doas freshclam && clamscan -riz --scan-pdf=yes "${_dotdir}"
+	"${_doas}" freshclam && clamscan -riz --scan-pdf=yes "${_dotdir}"
 }
 
 collect_dotfiles() {
-	#set -e
+	set -e
 
 	_fail="\033[31m"
 	_good="\033[32m"
@@ -97,7 +103,7 @@ collect_dotfiles() {
 		&& echo "${_good}[6/6] ----- Clamscan: No infected files found.${_rset}" \
 		|| echo "${_fail}[6/6] ----- Clamscan: Infected files found.${_rset}"
 
-	#set +e
+	set +e
 }
 
 prepare_backup() {
@@ -110,7 +116,7 @@ prepare_collecting_dotfiles() {
 	if pgrep mutt > /dev/null ; then
 		echo "mutt is still running." && exit 1
 	else
-		_dotdir="$HOME"/dotfiles/"$(date +%F)"
+		export _dotdir="$HOME"/dotfiles/"$(date +%F)"
 		[ -d "${_dotdir}" ] \
 			&& echo "${_dotdir} already exists. Do some clean-up!" && exit 1
 	fi
