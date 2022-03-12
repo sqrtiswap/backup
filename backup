@@ -101,13 +101,13 @@ collect_dotfiles() {
 }
 
 prepare_backup() {
-	if pgrep -q mutt ; then
+	if pgrep mutt > /dev/null ; then
 		echo "mutt is still running." && exit 1
 	fi
 }
 
 prepare_collecting_dotfiles() {
-	if pgrep -q mutt ; then
+	if pgrep mutt > /dev/null ; then
 		echo "mutt is still running." && exit 1
 	else
 		_dotdir="$HOME"/dotfiles/"$(date +%F)"
