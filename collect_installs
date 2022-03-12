@@ -3,14 +3,22 @@
 echo "Start collecting installed packages:"
 _installdir="${_dotdir}"/installed_packages
 
+mkdir -p "${_installdir}" \
+	&& echo "----> [1/2] ${_installdir} created." \
+	|| exit 1
+
 if [ "$(uname -s)" = "OpenBSD" ] ; then
 	pkg_info -tz >> "${_installdir}"/openbsd_pkgs.txt \
+		&& echo "----> [2/2] OpenBSD packages collected." \
 		|| exit 1
 elif [ "$(awk -F "(\"| )" 'NR == 1 { print $2 }' /etc/os-release)" = "Fedora" ] ; then
 	dnf history userinstalled >> "${_installdir}"/fedora_pkgs.txt \
+		&& echo "--------> [1/2] Fedora packages collected." \
 		|| exit 1
-	flatpak list >> "${_installdir}"/flatpaks.txt \
+	flatpak list --app >> "${_installdir}"/flatpaks.txt \
+		&& echo "--------> [2/2] Flatpaks collected." \
 		|| exit 1
+	echo "----> [2/2] Fedora installations collected."
 else
 	echo "OS is unknown. Aborting..." && exit 1
 fi
