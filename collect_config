@@ -62,4 +62,6 @@ if [ -d "$HOME"/.cache/mutt ] ; then
 		&& cp -R "$HOME"/.cache/mutt "${_configdir}"/.cache/ \
 		&& echo "----> [6/6] ~/.cache collected." \
 		|| exit 1
+else
+	echo "----> [6/6] ~/.cache/mutt does not exist. Nothing to collect."
 fi
