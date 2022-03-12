@@ -1,0 +1,65 @@
+#!/bin/sh
+
+echo "Start collecting configurations:"
+_configdir="${_dotdir}"/configurations
+
+mkdir -p "${_configdir}" \
+	&& echo "----> [1/6] ${_configdir} created." \
+	|| exit 1
+
+cp -R "$HOME"/.config "${_configdir}" \
+	&& echo "----> [2/6] ~/.config/ collected." \
+	|| exit 1
+
+cp -R \
+	"$HOME"/.exrc \
+	"$HOME"/.icons \
+	"$HOME"/.mbsyncrc \
+	"$HOME"/.notmuch-config \
+	"$HOME"/.tmux.conf \
+	"${_configdir}" \
+	&& echo "----> [3/6] General ~/. collected." \
+	|| exit 1
+
+if [ "$(uname -s)" = "OpenBSD" ] ; then
+	cp -R \
+		"$HOME"/.Xdefaults \
+		"$HOME"/.Xresources \
+		"$HOME"/.cshrc \
+		"$HOME"/.cvsrc \
+		"$HOME"/.cwmrc \
+		"$HOME"/.fvwmrc \
+		"$HOME"/.getmail \
+		"$HOME"/.kshrc \
+		"$HOME"/.ksh_completions \
+		"$HOME"/.login \
+		"$HOME"/.mailrc \
+		"$HOME"/.profile \
+		"$HOME"/.xsession \
+		"${_configdir}" \
+		&& echo "----> [4/6] OpenBSD specific ~/. collected." \
+		|| exit 1
+elif [ "$(awk -F "(\"| )" 'NR == 1 { print $2 }' /etc/os-release)" = "Fedora" ] ; then
+	cp -R \
+		"$HOME"/.bashrc \
+		"$HOME"/.gitconfig \
+		"$HOME"/.lesshst \
+		"$HOME"/.mpop_uidls \
+		"$HOME"/.var \
+		"${_configdir}" \
+		&& echo "----> [4/6] Fedora specific ~/. collected." \
+		|| exit 1
+else
+	echo "OS is unknown. Aborting..." && exit 1
+fi
+
+cp "$HOME"/default-acme.dump "${_configdir}"/ \
+	&& echo "----> [5/6] plan9port configs collected." \
+	|| exit 1
+
+if [ -d "$HOME"/.cache/mutt ] ; then
+	mkdir "${_configdir}"/.cache \
+		&& cp -R "$HOME"/.cache/mutt "${_configdir}"/.cache/ \
+		&& echo "----> [6/6] ~/.cache collected." \
+		|| exit 1
+fi
