@@ -9,7 +9,7 @@ fi
 echo "Start collecting privileged configurations:"
 _privdir="${_dotdir}"/PRIVILEGED
 
-mkdir -p "${_privdir}"/etc/X11/xenodm/ \
+mkdir -p "${_privdir}"/etc/ \
 	&& echo "----> [1/4] ${_privdir} created." \
 	|| exit 1
 
@@ -32,7 +32,11 @@ if [ "$(uname -s)" = "OpenBSD" ] ; then
 		/etc/wpa_supplicant.conf \
 		/etc/wsconsctl.conf \
 		"${_privdir}"/etc/ \
-		&& echo "--------> [1/2] OpenBSD specific /etc/ collected." \
+		&& echo "--------> [1/3] OpenBSD specific /etc/ collected." \
+		|| exit 1
+
+	mkdir -p "${_privdir}"/etc/X11/xenodm/ \
+		&& echo "--------> [2/3] Xenocara's directory created." \
 		|| exit 1
 
 	"${_doas}" cp \
@@ -40,20 +44,20 @@ if [ "$(uname -s)" = "OpenBSD" ] ; then
 		/etc/X11/xenodm/Xsetup_0 \
 		/etc/X11/xenodm/GiveConsole \
 		"${_privdir}"/etc/X11/xenodm/ \
-		&& echo "--------> [2/2] /etc/X11/xenodm/ collected." \
+		&& echo "--------> [3/3] /etc/X11/xenodm/ collected." \
 		|| exit 1
 
-	echo "----> [2/3] OpenBSD specific privileged configs collected."
+	echo "----> [3/4] OpenBSD specific privileged configs collected."
 elif [ "$(awk -F "(\"| )" 'NR == 1 { print $2 }' /etc/os-release)" = "Fedora" ] ; then
 	"${_doas}" cp \
 		/etc/man_db.conf \
 		"${_privdir}"/etc/ \
-		&& echo "----> [2/3] Fedora specific /etc/ collected." \
+		&& echo "----> [3/4] Fedora specific /etc/ collected." \
 		|| exit 1
 else
 	echo "OS is unknown. Aborting..." && exit 1
 fi
 
 "${_doas}" chown -R "$USER:$USER" "${_privdir}" \
-	&& echo "----> [3/3] changed ownership of privileged configs." \
+	&& echo "----> [4/4] changed ownership of privileged configs." \
 	|| exit 1
