@@ -7,7 +7,11 @@ else
 fi
 
 backup() {
-	_mntpoint="$2"
+	if [ -n "$2" ] ; then
+		_mntpoint="$2"
+	else
+		exit 1
+	fi
 
 	set -A dirlist Downloads \
 		Emails \
