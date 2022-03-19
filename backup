@@ -19,7 +19,8 @@ backup() {
 		exit 1
 	fi
 
-	set -A dirlist Downloads \
+	set -A dirlist Cloud \
+		Downloads \
 		Emails \
 		Pictures \
 		Wichtig \
@@ -71,39 +72,35 @@ scan_collection() {
 }
 
 collect_dotfiles() {
-	set -e
-
 	_fail="\033[31m"
 	_good="\033[32m"
 	_rset="\033[0m"
 
 	mkdir -p "${_dotdir}" \
 		&& echo "${_good}[1/6] ----- Created ${_dotdir}.${_rset}" \
-		|| echo "${_fail}[1/6] ----- Creating ${_dotdir} failed.${_rset}"
+		|| (echo "${_fail}[1/6] ----- Creating ${_dotdir} failed.${_rset}" && exit 1)
 
 	_backupscripts="$HOME"/sources/backup
 
 	"${_backupscripts}"/collect_config \
 		&& echo "${_good}[2/6] ----- Collected configurations.${_rset}" \
-		|| echo "${_fail}[2/6] ----- Collecting configurations failed.${_rset}"
+		|| (echo "${_fail}[2/6] ----- Collecting configurations failed.${_rset}" && exit 1)
 
 	"${_backupscripts}"/collect_privconfig \
 		&& echo "${_good}[3/6] ----- Collected privileged configurations.${_rset}" \
-		|| echo "${_fail}[3/6] ----- Collecting privileged configurations failed.${_rset}"
+		|| (echo "${_fail}[3/6] ----- Collecting privileged configurations failed.${_rset}" && exit 1)
 
 	"${_backupscripts}"/collect_installs \
 		&& echo "${_good}[4/6] ----- Created list of installed packages.${_rset}" \
-		|| echo "${_fail}[4/6] ----- Creating list of installed packages failed.${_rset}"
+		|| (echo "${_fail}[4/6] ----- Creating list of installed packages failed.${_rset}" && exit 1)
 
 	"${_backupscripts}"/collect_data \
 		&& echo "${_good}[5/6] ----- Collected data.${_rset}" \
-		|| echo "${_fail}[5/6] ----- Collecting data failed.${_rset}"
+		|| (echo "${_fail}[5/6] ----- Collecting data failed.${_rset}" && exit 1)
 
 	scan_collection \
 		&& echo "${_good}[6/6] ----- Clamscan: No infected files found.${_rset}" \
-		|| echo "${_fail}[6/6] ----- Clamscan: Infected files found.${_rset}"
-
-	set +e
+		|| (echo "${_fail}[6/6] ----- Clamscan: Infected files found.${_rset}" && exit 1)
 }
 
 prepare_backup() {

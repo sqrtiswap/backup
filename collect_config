@@ -12,10 +12,16 @@ cp -R "$HOME"/.config "${_configdir}" \
 	|| exit 1
 
 cp -R \
+	"$HOME"/.bashrc \
+	"$HOME"/.bash_paths \
 	"$HOME"/.exrc \
 	"$HOME"/.icons \
+	"$HOME"/.kshrc \
+	"$HOME"/.ksh_completions \
+	"$HOME"/.ksh_paths \
 	"$HOME"/.mbsyncrc \
 	"$HOME"/.notmuch-config \
+	"$HOME"/.profile \
 	"$HOME"/.tmux.conf \
 	"${_configdir}" \
 	&& echo "----> [3/6] General ~/. collected." \
@@ -30,22 +36,17 @@ if [ "$(uname -s)" = "OpenBSD" ] ; then
 		"$HOME"/.cwmrc \
 		"$HOME"/.fvwmrc \
 		"$HOME"/.getmail \
-		"$HOME"/.kshrc \
-		"$HOME"/.ksh_completions \
 		"$HOME"/.login \
 		"$HOME"/.mailrc \
-		"$HOME"/.profile \
 		"$HOME"/.xsession \
 		"${_configdir}" \
 		&& echo "----> [4/6] OpenBSD specific ~/. collected." \
 		|| exit 1
 elif [ "$(awk -F "(\"| )" 'NR == 1 { print $2 }' /etc/os-release)" = "Fedora" ] ; then
 	cp -R \
-		"$HOME"/.bashrc \
 		"$HOME"/.gitconfig \
 		"$HOME"/.lesshst \
 		"$HOME"/.mpop_uidls \
-		"$HOME"/.var \
 		"${_configdir}" \
 		&& echo "----> [4/6] Fedora specific ~/. collected." \
 		|| exit 1
