@@ -13,10 +13,10 @@ if [ "$(uname -s)" = "OpenBSD" ] ; then
 		|| exit 1
 elif [ "$(awk -F "(\"| )" 'NR == 1 { print $2 }' /etc/os-release)" = "Fedora" ] ; then
 	dnf history userinstalled >> "${_installdir}"/fedora_pkgs.txt \
-		&& echo "--------> [1/2] Fedora packages collected." \
+		&& echo "----------> [1/2] Fedora packages collected." \
 		|| exit 1
 	flatpak list --app >> "${_installdir}"/flatpaks.txt \
-		&& echo "--------> [2/2] Flatpaks collected." \
+		&& echo "----------> [2/2] Flatpaks collected." \
 		|| exit 1
 	echo "----> [2/2] Fedora installations collected."
 else

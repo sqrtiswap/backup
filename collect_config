@@ -21,7 +21,6 @@ cp -R \
 	"$HOME"/.ksh_paths \
 	"$HOME"/.mbsyncrc \
 	"$HOME"/.notmuch-config \
-	"$HOME"/.profile \
 	"$HOME"/.tmux.conf \
 	"${_configdir}" \
 	&& echo "----> [3/6] General ~/. collected." \
@@ -38,13 +37,13 @@ if [ "$(uname -s)" = "OpenBSD" ] ; then
 		"$HOME"/.getmail \
 		"$HOME"/.login \
 		"$HOME"/.mailrc \
+		"$HOME"/.profile \
 		"$HOME"/.xsession \
 		"${_configdir}" \
 		&& echo "----> [4/6] OpenBSD specific ~/. collected." \
 		|| exit 1
 elif [ "$(awk -F "(\"| )" 'NR == 1 { print $2 }' /etc/os-release)" = "Fedora" ] ; then
 	cp -R \
-		"$HOME"/.gitconfig \
 		"$HOME"/.lesshst \
 		"$HOME"/.mpop_uidls \
 		"${_configdir}" \
