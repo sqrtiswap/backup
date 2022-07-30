@@ -33,7 +33,7 @@ backup() {
 	while IFS= read -r d ; do
 		i=$((i+1))
 		"$RSYNC" -av --delete "$HOME"/"$d" "${_mntpoint}" \
-			&& printf "${_good}%s${_rset}\n" "---> synced $i/${nr}" \
+			&& printf "${_good}%s${_rset}\n" "---> Synced $i/${nr}" \
 			|| exit 1
 		echo "$d: $(find "$HOME"/"$d" -type f | wc -l)" >> "$HOME"/checkfilenumber-src.txt
 		echo "$d: $(find "${_mntpoint}"/"$d" -type f | wc -l)" >> "$HOME"/checkfilenumber-dest.txt
@@ -42,7 +42,7 @@ backup() {
 
 	echo "Check file number:"
 	diff "$HOME"/checkfilenumber-src.txt "$HOME"/checkfilenumber-dest.txt \
-		&& echo "${_good}--- file number is consistent. ---${_rset}" \
+		&& printf "${_good}%s${_rset}\n" "---> File number is consistent." \
 		&& rm "$HOME"/checkfilenumber-*.txt
 }
 
