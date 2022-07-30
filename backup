@@ -24,6 +24,7 @@ backup() {
 		Emails \
 		Pictures \
 		Wichtig \
+		Zotero \
 		bin \
 		documents \
 		dotfiles \
@@ -38,7 +39,7 @@ backup() {
 	for d in "${dirlist[@]}"; do
 		i=$((i+1))
 		"$RSYNC" -av --delete "$HOME"/"$d" "${_mntpoint}" \
-			&& echo "\033[32m--- synced $i/${nr} ---\033[0m" \
+			&& echo "\033[32m---> synced $i/${nr}\033[0m\n" \
 			|| exit 1
 		echo "$d: $(find "$HOME"/"$d" -type f | wc -l)" >> "$HOME"/checkfilenumber-src.txt
 		echo "$d: $(find "${_mntpoint}"/"$d" -type f | wc -l)" >> "$HOME"/checkfilenumber-dest.txt
@@ -61,7 +62,7 @@ check_bitrot() {
 	for d in "${checklist[@]}"; do
 		i=$((i+1))
 		cd "$HOME"/"$d" && bitrot \
-			&& echo "\033[32m--- checked bitrot $i/${nr} ($HOME/$d) ---\033[0m" \
+			&& echo "\033[32m---> checked bitrot $i/${nr} ($HOME/$d)\033[0m\n" \
 			|| exit 1
 	done
 }
@@ -76,46 +77,68 @@ collect_dotfiles() {
 	_good="\033[32m"
 	_rset="\033[0m"
 
-	mkdir -p "${_dotdir}" \
-		&& echo "${_good}[1/6] ----- Created ${_dotdir}.${_rset}" \
-		|| (echo "${_fail}[1/6] ----- Creating ${_dotdir} failed.${_rset}" && exit 1)
+	if mkdir -p "${_dotdir}" ; then
+		echo "${_good}[1/6] ----- Created ${_dotdir}.${_rset}"
+	else
+		echo "${_fail}[1/6] ----- Creating ${_dotdir} failed.${_rset}" 
+		exit 1
+	fi
 
 	_backupscripts="$HOME"/sources/backup
 
-	"${_backupscripts}"/collect_config \
-		&& echo "${_good}[2/6] ----- Collected configurations.${_rset}" \
-		|| (echo "${_fail}[2/6] ----- Collecting configurations failed.${_rset}" && exit 1)
+	if "${_backupscripts}"/collect_config ; then
+		echo "${_good}[2/6] ----- Collected configurations.${_rset}"
+	else
+		echo "${_fail}[2/6] ----- Collecting configurations failed.${_rset}"
+		exit 1
+	fi
 
-	"${_backupscripts}"/collect_privconfig \
-		&& echo "${_good}[3/6] ----- Collected privileged configurations.${_rset}" \
-		|| (echo "${_fail}[3/6] ----- Collecting privileged configurations failed.${_rset}" && exit 1)
+	if "${_backupscripts}"/collect_privconfig ; then
+		echo "${_good}[3/6] ----- Collected privileged configurations.${_rset}"
+	else
+		echo "${_fail}[3/6] ----- Collecting privileged configurations failed.${_rset}"
+		exit 1
+	fi
 
-	"${_backupscripts}"/collect_installs \
-		&& echo "${_good}[4/6] ----- Created list of installed packages.${_rset}" \
-		|| (echo "${_fail}[4/6] ----- Creating list of installed packages failed.${_rset}" && exit 1)
+	if "${_backupscripts}"/collect_installs ; then
+		echo "${_good}[4/6] ----- Created list of installed packages.${_rset}"
+	else
+		echo "${_fail}[4/6] ----- Creating list of installed packages failed.${_rset}"
+		exit 1
+	fi
 
-	"${_backupscripts}"/collect_data \
-		&& echo "${_good}[5/6] ----- Collected data.${_rset}" \
-		|| (echo "${_fail}[5/6] ----- Collecting data failed.${_rset}" && exit 1)
+	if "${_backupscripts}"/collect_data ; then
+		echo "${_good}[5/6] ----- Collected data.${_rset}"
+	else
+		echo "${_fail}[5/6] ----- Collecting data failed.${_rset}"
+		exit 1
+	fi
 
-	scan_collection \
-		&& echo "${_good}[6/6] ----- Clamscan: No infected files found.${_rset}" \
-		|| (echo "${_fail}[6/6] ----- Clamscan: Infected files found.${_rset}" && exit 1)
+	if scan_collection ; then
+		echo "${_good}[6/6] ----- Clamscan: No infected files found.${_rset}"
+	else
+		echo "${_fail}[6/6] ----- Clamscan: Infected files found.${_rset}"
+		exit 1
+	fi
 }
 
 prepare_backup() {
 	if pgrep mutt > /dev/null ; then
-		echo "mutt is still running." && exit 1
+		echo "mutt is still running." \
+			&& exit 1
 	fi
 }
 
 prepare_collecting_dotfiles() {
 	if pgrep mutt > /dev/null ; then
-		echo "mutt is still running." && exit 1
+		echo "mutt is still running." \
+			&& exit 1
 	else
-		export _dotdir="$HOME"/dotfiles/"$(date +%F)"
+		_dotdir="$HOME"/dotfiles/"$(date +%F)"
+		export _dotdir
 		[ -d "${_dotdir}" ] \
-			&& echo "${_dotdir} already exists. Do some clean-up!" && exit 1
+			&& echo "${_dotdir} already exists. Do some clean-up!" \
+			&& exit 1
 	fi
 }
 
