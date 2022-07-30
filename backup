@@ -1,4 +1,8 @@
-#!/bin/ksh
+#!/bin/sh
+
+_fail="\033[31m"
+_good="\033[32m"
+_rset="\033[0m"
 
 if command -v rsync > /dev/null ; then
 	RSYNC='rsync'
@@ -12,6 +16,10 @@ else
 	_doas=sudo
 fi
 
+_resourcedir="$HOME"/sources/backup
+
+dirlist="${_resourcedir}"/directories.txt
+
 backup() {
 	if [ -n "$2" ] ; then
 		_mntpoint="$2"
@@ -19,50 +27,33 @@ backup() {
 		exit 1
 	fi
 
-	set -A dirlist Cloud \
-		Downloads \
-		Emails \
-		Pictures \
-		Wichtig \
-		Zotero \
-		bin \
-		documents \
-		dotfiles \
-		inbox \
-		man \
-		media \
-		sources
-
-	nr=${#dirlist[@]}
+	nr=$(grep -c '' "$dirlist")
 	i=0
 
-	for d in "${dirlist[@]}"; do
+	while IFS= read -r d ; do
 		i=$((i+1))
 		"$RSYNC" -av --delete "$HOME"/"$d" "${_mntpoint}" \
-			&& echo "\033[32m---> synced $i/${nr}\033[0m\n" \
+			&& printf '%s\n' "${_good}---> synced $i/${nr}${_rset}" \
 			|| exit 1
 		echo "$d: $(find "$HOME"/"$d" -type f | wc -l)" >> "$HOME"/checkfilenumber-src.txt
 		echo "$d: $(find "${_mntpoint}"/"$d" -type f | wc -l)" >> "$HOME"/checkfilenumber-dest.txt
-	done
+	done < "$dirlist"
 	[ -f "$HOME"/mbox ] && cp "$HOME"/mbox "${_mntpoint}"
 
 	echo "Check file number:"
 	diff "$HOME"/checkfilenumber-src.txt "$HOME"/checkfilenumber-dest.txt \
-		&& echo "\033[32m--- file number is consistent. ---\033[0m" \
+		&& echo "${_good}--- file number is consistent. ---${_rset}" \
 		&& rm "$HOME"/checkfilenumber-*.txt
 }
 
 check_bitrot() {
-	set -A checklist Pictures \
-		Wichtig \
-		documents \
-		media
-	nr=${#checklist[@]}
+	checklist='Pictures Wichtig documents media'
+	nr=4
 	i=0
-	for d in "${checklist[@]}"; do
+	for d in $checklist ; do
 		i=$((i+1))
 		cd "$HOME"/"$d" && bitrot \
-			&& echo "\033[32m---> checked bitrot $i/${nr} ($HOME/$d)\033[0m\n" \
+			&& printf '%s\n' "${_good}---> checked bitrot $i/${nr} ($HOME/$d)${_rset}" \
 			|| exit 1
 	done
 }
@@ -73,10 +64,6 @@ scan_collection() {
 }
 
 collect_dotfiles() {
-	_fail="\033[31m"
-	_good="\033[32m"
-	_rset="\033[0m"
-
 	if mkdir -p "${_dotdir}" ; then
 		echo "${_good}[1/6] ----- Created ${_dotdir}.${_rset}"
 	else
@@ -84,30 +71,28 @@ collect_dotfiles() {
 		exit 1
 	fi
 
-	_backupscripts="$HOME"/sources/backup
-
-	if "${_backupscripts}"/collect_config ; then
+	if "${_resourcedir}"/collect_config ; then
 		echo "${_good}[2/6] ----- Collected configurations.${_rset}"
 	else
 		echo "${_fail}[2/6] ----- Collecting configurations failed.${_rset}"
 		exit 1
 	fi
 
-	if "${_backupscripts}"/collect_privconfig ; then
+	if "${_resourcedir}"/collect_privconfig ; then
 		echo "${_good}[3/6] ----- Collected privileged configurations.${_rset}"
 	else
 		echo "${_fail}[3/6] ----- Collecting privileged configurations failed.${_rset}"
 		exit 1
 	fi
 
-	if "${_backupscripts}"/collect_installs ; then
+	if "${_resourcedir}"/collect_installs ; then
 		echo "${_good}[4/6] ----- Created list of installed packages.${_rset}"
 	else
 		echo "${_fail}[4/6] ----- Creating list of installed packages failed.${_rset}"
 		exit 1
 	fi
 
-	if "${_backupscripts}"/collect_data ; then
+	if "${_resourcedir}"/collect_data ; then
 		echo "${_good}[5/6] ----- Collected data.${_rset}"
 	else
 		echo "${_fail}[5/6] ----- Collecting data failed.${_rset}"
@@ -143,7 +128,8 @@ prepare_collecting_dotfiles() {
 }
 
 usage() {
-	echo "backup has options:
+	echo "\
+backup has the following options:
 all	[dir]	-> backup all directories to [dir]
 bitrot		-> check for bitrot in selected directories
 dotfiles	-> collect dotfiles"
