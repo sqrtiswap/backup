@@ -9,7 +9,6 @@ mkdir "${_datadir}" \
 
 cp -R \
 	"$HOME"/.reminders \
-	"$HOME"/.tkremindrc \
 	"$HOME"/.include-remind \
 	"${_datadir}"/ \
 	&& echo "----> [2/7] calendar data collected." \
