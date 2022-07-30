@@ -33,7 +33,7 @@ backup() {
 	while IFS= read -r d ; do
 		i=$((i+1))
 		"$RSYNC" -av --delete "$HOME"/"$d" "${_mntpoint}" \
-			&& printf '%s\n' "${_good}---> synced $i/${nr}${_rset}" \
+			&& printf "${_good}%s${_rset}\n" "---> synced $i/${nr}" \
 			|| exit 1
 		echo "$d: $(find "$HOME"/"$d" -type f | wc -l)" >> "$HOME"/checkfilenumber-src.txt
 		echo "$d: $(find "${_mntpoint}"/"$d" -type f | wc -l)" >> "$HOME"/checkfilenumber-dest.txt
@@ -53,7 +53,7 @@ check_bitrot() {
 	for d in $checklist ; do
 		i=$((i+1))
 		cd "$HOME"/"$d" && bitrot \
-			&& printf '%s\n' "${_good}---> checked bitrot $i/${nr} ($HOME/$d)${_rset}" \
+			&& printf "${_good}%s${_rset}\n" "---> checked bitrot $i/${nr} ($HOME/$d)" \
 			|| exit 1
 	done
 }
