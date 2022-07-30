@@ -15,13 +15,17 @@ cp -R \
 	"$HOME"/.bashrc \
 	"$HOME"/.bash_paths \
 	"$HOME"/.exrc \
+	"$HOME"/.gitconfig \
+	"$HOME"/.gitignore \
 	"$HOME"/.icons \
 	"$HOME"/.kshrc \
 	"$HOME"/.ksh_completions \
 	"$HOME"/.ksh_paths \
 	"$HOME"/.mbsyncrc \
 	"$HOME"/.notmuch-config \
+	"$HOME"/.ssh \
 	"$HOME"/.tmux.conf \
+	"$HOME"/.zotero \
 	"${_configdir}" \
 	&& echo "----> [3/6] General ~/. collected." \
 	|| exit 1
