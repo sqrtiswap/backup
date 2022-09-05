@@ -4,6 +4,8 @@ _fail="\033[31m"
 _good="\033[32m"
 _rset="\033[0m"
 
+set -e
+
 if command -v rsync > /dev/null ; then
 	RSYNC='rsync'
 else
@@ -135,6 +137,8 @@ bitrot		-> check for bitrot in selected directories
 dotfiles	-> collect dotfiles"
 exit 1
 }
+
+set +e
 
 case $1 in
 all)
