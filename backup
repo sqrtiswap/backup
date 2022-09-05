@@ -129,13 +129,13 @@ prepare_collecting_dotfiles() {
 	fi
 }
 
-usage() {
-	echo "\
-backup has the following options:
-all	[dir]	-> backup all directories to [dir]
-bitrot		-> check for bitrot in selected directories
-dotfiles	-> collect dotfiles"
-exit 1
+usage() { cat << USAGE
+${0##*/} - a selection of scripts for reliable backups
+usage: ${0##*/}	all [dir] -> backup all directories to [dir]
+		bitrot    -> check for bitrot in selected directories
+		dotfiles  -> collect dotfiles"
+USAGE
+	exit 1
 }
 
 set +e
