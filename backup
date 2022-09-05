@@ -20,7 +20,7 @@ fi
 
 _resourcedir="$HOME"/sources/backup
 
-dirlist="${_resourcedir}"/directories.txt
+dirlist="${_resourcedir}"/list-backup.txt
 
 backup() {
 	if [ -n "$2" ] ; then
