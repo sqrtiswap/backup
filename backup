@@ -49,15 +49,15 @@ backup() {
 }
 
 check_bitrot() {
-	checklist='Pictures Wichtig documents media'
-	nr=4
+	checklist="${_resourcedir}"/list-bitrot.txt
+	nr=$(grep -c '' "$checklist")
 	i=0
-	for d in $checklist ; do
+	while IFS= read -r d ; do
 		i=$((i+1))
 		cd "$HOME"/"$d" && bitrot \
 			&& printf "${_good}%s${_rset}\n" "---> checked bitrot $i/${nr} ($HOME/$d)" \
 			|| exit 1
-	done
+	done < "$checklist"
 }
 
 scan_collection() {
