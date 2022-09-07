@@ -67,44 +67,44 @@ scan_collection() {
 
 collect_dotfiles() {
 	if mkdir -p "${_dotdir}" ; then
-		printf "%s[1/6] ----- Created %s.%s\n" "${_good}" "${_dotdir}" "${_rset}"
+		printf "${_good}[1/6] ----- Created ${_dotdir}.${_rset}\n"
 	else
-		printf "%s[1/6] ----- Creating %s failed.%s\n" "${_fail}" "${_dotdir}" "${_rset}"
+		printf "${_fail}[1/6] ----- Creating ${_dotdir} failed.${_rset}\n"
 		exit 1
 	fi
 
 	if "${_resourcedir}"/collect_config ; then
-		printf "%s[2/6] ----- Collected configurations.%s\n" "${_good}" "${_rset}"
+		printf "${_good}[2/6] ----- Collected configurations.${_rset}\n"
 	else
-		printf "%s[2/6] ----- Collecting configurations failed.%s\n" "${_fail}" "${_rset}"
+		printf "${_fail}[2/6] ----- Collecting configurations failed.${_rset}\n"
 		exit 1
 	fi
 
 	if "${_resourcedir}"/collect_privconfig ; then
-		printf "%s[3/6] ----- Collected privileged configurations.%s\n" "${_good}" "${_rset}"
+		printf "${_good}[3/6] ----- Collected privileged configurations.${_rset}\n"
 	else
-		printf "%s[3/6] ----- Collecting privileged configurations failed.%s\n" "${_fail}" "${_rset}"
+		printf "${_fail}[3/6] ----- Collecting privileged configurations failed.${_rset}\n"
 		exit 1
 	fi
 
 	if "${_resourcedir}"/collect_installs ; then
-		printf "%s[4/6] ----- Created list of installed packages.%s\n" "${_good}" "${_rset}"
+		printf "${_good}[4/6] ----- Created list of installed packages.${_rset}\n"
 	else
-		printf "%s[4/6] ----- Creating list of installed packages failed.%s\n" "${_fail}" "${_rset}"
+		printf "${_fail}[4/6] ----- Creating list of installed packages failed.${_rset}\n"
 		exit 1
 	fi
 
 	if "${_resourcedir}"/collect_data ; then
-		printf "%s[5/6] ----- Collected data.%s\n" "${_good}" "${_rset}"
+		printf "${_good}[5/6] ----- Collected data.${_rset}\n"
 	else
-		printf "%s[5/6] ----- Collecting data failed.%s\n" "${_fail}" "${_rset}"
+		printf "${_fail}[5/6] ----- Collecting data failed.${_rset}\n"
 		exit 1
 	fi
 
 	if scan_collection ; then
-		printf "%s[6/6] ----- Clamscan: No infected files found.%s\n" "${_good}" "${_rset}"
+		printf "${_good}[6/6] ----- Clamscan: No infected files found.${_rset}\n"
 	else
-		printf "%s[6/6] ----- Clamscan: Infected files found.%s\n" "${_fail}" "${_rset}"
+		printf "${_fail}[6/6] ----- Clamscan: Infected files found.${_rset}\n"
 		exit 1
 	fi
 }
