@@ -37,15 +37,8 @@ backup() {
 		"$RSYNC" -av --delete "$HOME/$d" "${_mntpoint}/" \
 			&& printf "${_good}%s${_rset}\n\n" "---> Synced $i/${nr}" \
 			|| exit 1
-		echo "$d: $(find "$HOME"/"$d" -type f | wc -l)" >> "$HOME"/checkfilenumber-src.txt
-		echo "$d: $(find "${_mntpoint}"/"$d" -type f | wc -l)" >> "$HOME"/checkfilenumber-dest.txt
 	done < "$dirlist"
 	[ -f "$HOME"/mbox ] && cp "$HOME"/mbox "${_mntpoint}"
-
-	echo "Check file number:"
-	diff "$HOME"/checkfilenumber-src.txt "$HOME"/checkfilenumber-dest.txt \
-		&& printf "${_good}%s${_rset}\n" "---> File number is consistent." \
-		&& rm "$HOME"/checkfilenumber-*.txt
 }
 
 check_bitrot() {
