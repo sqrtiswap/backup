@@ -34,8 +34,8 @@ backup() {
 
 	while IFS= read -r d ; do
 		i=$((i+1))
-		"$RSYNC" -av --delete "$HOME"/"$d" "${_mntpoint}" \
-			&& printf "${_good}%s${_rset}\n" "---> Synced $i/${nr}" \
+		"$RSYNC" -av --delete "$HOME/$d" "${_mntpoint}/" \
+			&& printf "${_good}%s${_rset}\n\n" "---> Synced $i/${nr}" \
 			|| exit 1
 		echo "$d: $(find "$HOME"/"$d" -type f | wc -l)" >> "$HOME"/checkfilenumber-src.txt
 		echo "$d: $(find "${_mntpoint}"/"$d" -type f | wc -l)" >> "$HOME"/checkfilenumber-dest.txt
@@ -55,7 +55,7 @@ check_bitrot() {
 	while IFS= read -r d ; do
 		i=$((i+1))
 		cd "$HOME"/"$d" && bitrot \
-			&& printf "${_good}%s${_rset}\n" "---> checked bitrot $i/${nr} ($HOME/$d)" \
+			&& printf "${_good}%s${_rset}\n\n" "---> checked bitrot $i/${nr} ($HOME/$d)" \
 			|| exit 1
 	done < "$checklist"
 }
@@ -67,44 +67,44 @@ scan_collection() {
 
 collect_dotfiles() {
 	if mkdir -p "${_dotdir}" ; then
-		printf "${_good}[1/6] ----- Created ${_dotdir}.${_rset}\n"
+		printf "${_good}[1/6] ----- Created ${_dotdir}.${_rset}\n\n"
 	else
-		printf "${_fail}[1/6] ----- Creating ${_dotdir} failed.${_rset}\n"
+		printf "${_fail}[1/6] ----- Creating ${_dotdir} failed.${_rset}\n\n"
 		exit 1
 	fi
 
 	if "${_resourcedir}"/collect_config ; then
-		printf "${_good}[2/6] ----- Collected configurations.${_rset}\n"
+		printf "${_good}[2/6] ----- Collected configurations.${_rset}\n\n"
 	else
-		printf "${_fail}[2/6] ----- Collecting configurations failed.${_rset}\n"
+		printf "${_fail}[2/6] ----- Collecting configurations failed.${_rset}\n\n"
 		exit 1
 	fi
 
 	if "${_resourcedir}"/collect_privconfig ; then
-		printf "${_good}[3/6] ----- Collected privileged configurations.${_rset}\n"
+		printf "${_good}[3/6] ----- Collected privileged configurations.${_rset}\n\n"
 	else
-		printf "${_fail}[3/6] ----- Collecting privileged configurations failed.${_rset}\n"
+		printf "${_fail}[3/6] ----- Collecting privileged configurations failed.${_rset}\n\n"
 		exit 1
 	fi
 
 	if "${_resourcedir}"/collect_installs ; then
-		printf "${_good}[4/6] ----- Created list of installed packages.${_rset}\n"
+		printf "${_good}[4/6] ----- Created list of installed packages.${_rset}\n\n"
 	else
-		printf "${_fail}[4/6] ----- Creating list of installed packages failed.${_rset}\n"
+		printf "${_fail}[4/6] ----- Creating list of installed packages failed.${_rset}\n\n"
 		exit 1
 	fi
 
 	if "${_resourcedir}"/collect_data ; then
-		printf "${_good}[5/6] ----- Collected data.${_rset}\n"
+		printf "${_good}[5/6] ----- Collected data.${_rset}\n\n"
 	else
-		printf "${_fail}[5/6] ----- Collecting data failed.${_rset}\n"
+		printf "${_fail}[5/6] ----- Collecting data failed.${_rset}\n\n"
 		exit 1
 	fi
 
 	if scan_collection ; then
-		printf "${_good}[6/6] ----- Clamscan: No infected files found.${_rset}\n"
+		printf "${_good}[6/6] ----- Clamscan: No infected files found.${_rset}\n\n"
 	else
-		printf "${_fail}[6/6] ----- Clamscan: Infected files found.${_rset}\n"
+		printf "${_fail}[6/6] ----- Clamscan: Infected files found.${_rset}\n\n"
 		exit 1
 	fi
 }
