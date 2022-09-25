@@ -53,51 +53,39 @@ check_bitrot() {
 	done < "$checklist"
 }
 
-scan_collection() {
-	echo "Scan collected dotfiles:"
-	"${_doas}" freshclam && clamscan -riz --scan-pdf=yes "${_dotdir}"
-}
-
 collect_dotfiles() {
 	if mkdir -p "${_dotdir}" ; then
-		printf "${_good}[1/6] ----- Created ${_dotdir}.${_rset}\n\n"
+		printf "${_good}[1/5] ----- Created ${_dotdir}.${_rset}\n\n"
 	else
-		printf "${_fail}[1/6] ----- Creating ${_dotdir} failed.${_rset}\n\n"
+		printf "${_fail}[1/5] ----- Creating ${_dotdir} failed.${_rset}\n\n"
 		exit 1
 	fi
 
 	if "${_resourcedir}"/collect_config ; then
-		printf "${_good}[2/6] ----- Collected configurations.${_rset}\n\n"
+		printf "${_good}[2/5] ----- Collected configurations.${_rset}\n\n"
 	else
-		printf "${_fail}[2/6] ----- Collecting configurations failed.${_rset}\n\n"
+		printf "${_fail}[2/5] ----- Collecting configurations failed.${_rset}\n\n"
 		exit 1
 	fi
 
 	if "${_resourcedir}"/collect_privconfig ; then
-		printf "${_good}[3/6] ----- Collected privileged configurations.${_rset}\n\n"
+		printf "${_good}[3/5] ----- Collected privileged configurations.${_rset}\n\n"
 	else
-		printf "${_fail}[3/6] ----- Collecting privileged configurations failed.${_rset}\n\n"
+		printf "${_fail}[3/5] ----- Collecting privileged configurations failed.${_rset}\n\n"
 		exit 1
 	fi
 
 	if "${_resourcedir}"/collect_installs ; then
-		printf "${_good}[4/6] ----- Created list of installed packages.${_rset}\n\n"
+		printf "${_good}[4/5] ----- Created list of installed packages.${_rset}\n\n"
 	else
-		printf "${_fail}[4/6] ----- Creating list of installed packages failed.${_rset}\n\n"
+		printf "${_fail}[4/5] ----- Creating list of installed packages failed.${_rset}\n\n"
 		exit 1
 	fi
 
 	if "${_resourcedir}"/collect_data ; then
-		printf "${_good}[5/6] ----- Collected data.${_rset}\n\n"
+		printf "${_good}[5/5] ----- Collected data.${_rset}\n\n"
 	else
-		printf "${_fail}[5/6] ----- Collecting data failed.${_rset}\n\n"
-		exit 1
-	fi
-
-	if scan_collection ; then
-		printf "${_good}[6/6] ----- Clamscan: No infected files found.${_rset}\n\n"
-	else
-		printf "${_fail}[6/6] ----- Clamscan: Infected files found.${_rset}\n\n"
+		printf "${_fail}[5/5] ----- Collecting data failed.${_rset}\n\n"
 		exit 1
 	fi
 }
