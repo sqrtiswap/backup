@@ -6,17 +6,12 @@ _rset="\033[0m"
 
 set -e
 
-if command -v rsync > /dev/null ; then
-	RSYNC='rsync'
-else
-	RSYNC='openrsync'
-fi
-
-if command -v doas > /dev/null ; then
-	_doas=doas
-else
-	_doas=sudo
-fi
+command -v rsync > /dev/null \
+	&& RSYNC='rsync' \
+	|| RSYNC='openrsync'
+command -v doas > /dev/null \
+	&& _doas=doas \
+	|| _doas=sudo
 
 _resourcedir="$HOME"/sources/backup
 
@@ -39,6 +34,7 @@ check_bitrot() {
 	checklist="${_resourcedir}"/list-bitrot.txt
 	nr=$(grep -c '' "$checklist")
 	i=0
+
 	while IFS= read -r d ; do
 		i=$((i+1))
 		cd "$HOME"/"$d" && bitrot \
