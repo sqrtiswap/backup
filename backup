@@ -138,12 +138,43 @@ collect_installs() {
 }
 
 collect_data() {
-	if "${_resourcedir}"/collect_data ; then
-		printf "${_good}[5/5] ----- Collected data.${_rset}\n\n"
-	else
-		printf "${_fail}[5/5] ----- Collecting data failed.${_rset}\n\n"
-		exit 1
-	fi
+	echo "Start collecting data:"
+	_datadir="${_dotdir}"/data
+
+	mkdir "${_datadir}" \
+		&& echo "----> [1/7] ${_datadir} created." \
+		|| exit 1
+
+	cp -R \
+		"$HOME"/.reminders \
+		"$HOME"/.include-remind \
+		"${_datadir}"/ \
+		&& echo "----> [2/7] calendar data collected." \
+		|| exit 1
+
+	nr_of_reports="$(grep -c "$(date +%F)" "$TODODIR"/report.txt)"
+	[ "${nr_of_reports}" -lt 1 ] && todo -q report
+	cp -R "$TODODIR" "${_datadir}" \
+		&& echo "----> [3/7] todo data collected." \
+		|| exit 1
+
+	cp -R \
+		"$HOME"/.gnupg \
+		"${_datadir}" \
+		&& echo "----> [4/7] gpg collected." \
+		|| exit 1
+
+	mv "$HOME"/Downloads/bookmarks.html "${_datadir}"/torbookmarks.html \
+		&& echo "----> [5/7] torbookmarks collected." \
+		|| exit 1
+
+	mv "$HOME"/Downloads/bookmarks_"$(date +%d_%m_%Y)".html "${_datadir}"/chromebookmarks.html \
+		&& echo "----> [6/7] chromebookmarks collected." \
+		|| exit 1
+
+	notmuch dump --output="${_datadir}"/notmuch-dump.txt \
+		&& echo "----> [7/7] notmuch dumped." \
+		|| exit 1
 }
 
 finish_dotfiles() {
