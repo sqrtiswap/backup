@@ -59,7 +59,7 @@ collect_config() {
 	while IFS= read -r c ; do
 		if [ -e "$HOME"/.config/"$c" ] ; then
 			i=$((i+1))
-			cp -R "$c" "${_configdir}"/.config \
+			cp -R "$HOME"/.config/"$c" "${_configdir}"/.config \
 				&& printf "${_good}%s${_rset}\n" "collected $i/${nr} ($HOME/.config/$c)" \
 				|| exit 1
 		else
@@ -75,7 +75,7 @@ collect_config() {
 	while IFS= read -r h ; do
 		if [ -e "$HOME"/"$h" ] ; then
 			i=$((i+1))
-			cp -R "$c" "${_configdir}" \
+			cp -R "$HOME"/"$c" "${_configdir}" \
 				&& printf "${_good}%s${_rset}\n" "collected $i/${nr} ($HOME/$h)" \
 				|| exit 1
 		else
@@ -96,7 +96,7 @@ collect_config() {
 	while IFS= read -r g ; do
 		if [ -e "$HOME"/.gnupg/"$g" ] ; then
 			i=$((i+1))
-			cp "$g" "${_gpgdir}" \
+			cp "$HOME"/.gnupg/"$g" "${_gpgdir}" \
 				&& printf "${_good}%s${_rset}\n" "collected $i/${nr} ($HOME/.gnupg/$g)" \
 				|| exit 1
 		else
