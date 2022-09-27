@@ -106,12 +106,61 @@ collect_config() {
 }
 
 collect_privconfig() {
-	if "${_resourcedir}"/collect_privconfig ; then
-		printf "${_good}[3/5] ----- Collected privileged configurations.${_rset}\n\n"
+	echo "Start collecting privileged configurations:"
+	_privdir="${_dotdir}"/PRIVILEGED
+
+	mkdir -p "${_privdir}"/etc/ \
+		&& echo "----> [1/4] ${_privdir} created." \
+		|| exit 1
+
+	"${_doas}" cp \
+		/etc/doas.conf \
+		/etc/freshclam.conf \
+		/etc/fstab \
+		"${_privdir}"/etc/ \
+		&& echo "----> [2/4] General /etc/ collected." \
+		|| exit 1
+
+	if [ "$(uname -s)" = "OpenBSD" ] ; then
+		"${_doas}" cp \
+			/etc/login.conf \
+			/etc/man.conf \
+			/etc/mixerctl.conf \
+			/etc/ntpd.conf \
+			/etc/sndioctl.conf \
+			/etc/sysclean.ignore \
+			/etc/wpa_supplicant.conf \
+			/etc/wsconsctl.conf \
+			"${_privdir}"/etc/ \
+			&& echo "--------> [1/3] OpenBSD specific /etc/ collected." \
+			|| exit 1
+
+		mkdir -p "${_privdir}"/etc/X11/xenodm/ \
+			&& echo "--------> [2/3] Xenocara's directory created." \
+			|| exit 1
+
+		"${_doas}" cp \
+			/etc/X11/xenodm/Xresources* \
+			/etc/X11/xenodm/Xsetup_0 \
+			/etc/X11/xenodm/GiveConsole \
+			"${_privdir}"/etc/X11/xenodm/ \
+			&& echo "--------> [3/3] /etc/X11/xenodm/ collected." \
+			|| exit 1
+
+		echo "----> [3/4] OpenBSD specific privileged configs collected."
+	elif [ "$(awk -F "(\"| )" 'NR == 1 { print $2 }' /etc/os-release)" = "Fedora" ] ; then
+		"${_doas}" cp \
+			/etc/man_db.conf \
+			"${_privdir}"/etc/ \
+			&& echo "----> [3/4] Fedora specific /etc/ collected." \
+			|| exit 1
 	else
-		printf "${_fail}[3/5] ----- Collecting privileged configurations failed.${_rset}\n\n"
-		exit 1
+		echo "OS is unknown. Aborting..." && exit 1
 	fi
+
+	"${_doas}" chown -R "$USER:$USER" "${_privdir}" \
+		&& echo "----> [4/4] changed ownership of privileged configs." \
+		|| exit 1
 }
 
 collect_installs() {
