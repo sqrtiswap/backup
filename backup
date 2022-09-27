@@ -85,15 +85,15 @@ finish_dotfiles() {
 
 prepare_backup() {
 	if pgrep mutt > /dev/null ; then
-		echo "mutt is still running." \
-			&& exit 1
+		echo "mutt is still running."
+		exit 1
 	fi
 }
 
-prepare_collecting_dotfiles() {
+prepare_dotfiles() {
 	if pgrep mutt > /dev/null ; then
-		echo "mutt is still running." \
-			&& exit 1
+		echo "mutt is still running."
+		exit 1
 	else
 		_dotdir="$HOME"/dotfiles/"$(date +%F)"
 		export _dotdir
@@ -130,9 +130,8 @@ bitrot)
 	check_bitrot
 	;;
 dotfiles)
-	prepare_collecting_dotfiles
+	prepare_dotfiles
 	collect_config
-	collect_home
 	collect_data
 	collect_privconfig
 	collect_installs
