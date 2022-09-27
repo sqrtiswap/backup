@@ -53,42 +53,43 @@ check_bitrot() {
 	done < "$checklist"
 }
 
-collect_dotfiles() {
-	if mkdir -p "${_dotdir}" ; then
-		printf "${_good}[1/5] ----- Created ${_dotdir}.${_rset}\n\n"
-	else
-		printf "${_fail}[1/5] ----- Creating ${_dotdir} failed.${_rset}\n\n"
-		exit 1
-	fi
-
+collect_config() {
 	if "${_resourcedir}"/collect_config ; then
 		printf "${_good}[2/5] ----- Collected configurations.${_rset}\n\n"
 	else
 		printf "${_fail}[2/5] ----- Collecting configurations failed.${_rset}\n\n"
 		exit 1
 	fi
+}
 
+collect_privconfig() {
 	if "${_resourcedir}"/collect_privconfig ; then
 		printf "${_good}[3/5] ----- Collected privileged configurations.${_rset}\n\n"
 	else
 		printf "${_fail}[3/5] ----- Collecting privileged configurations failed.${_rset}\n\n"
 		exit 1
 	fi
+}
 
+collect_installs() {
 	if "${_resourcedir}"/collect_installs ; then
 		printf "${_good}[4/5] ----- Created list of installed packages.${_rset}\n\n"
 	else
 		printf "${_fail}[4/5] ----- Creating list of installed packages failed.${_rset}\n\n"
 		exit 1
 	fi
+}
 
+collect_data() {
 	if "${_resourcedir}"/collect_data ; then
 		printf "${_good}[5/5] ----- Collected data.${_rset}\n\n"
 	else
 		printf "${_fail}[5/5] ----- Collecting data failed.${_rset}\n\n"
 		exit 1
 	fi
+}
 
+finish_dotfiles() {
 	cd "${_dotdir}" && du -d1 | sort -h
 }
 
@@ -109,6 +110,13 @@ prepare_collecting_dotfiles() {
 		[ -d "${_dotdir}" ] \
 			&& echo "${_dotdir} already exists. Do some clean-up!" \
 			&& exit 1
+	fi
+
+	if mkdir -p "${_dotdir}" ; then
+		printf "${_good}[1/5] ----- Created ${_dotdir}.${_rset}\n\n"
+	else
+		printf "${_fail}[1/5] ----- Creating ${_dotdir} failed.${_rset}\n\n"
+		exit 1
 	fi
 }
 
@@ -133,7 +141,12 @@ bitrot)
 	;;
 dotfiles)
 	prepare_collecting_dotfiles
-	collect_dotfiles
+	collect_config
+	collect_home
+	collect_data
+	collect_privconfig
+	collect_installs
+	finish_dotfiles
 	;;
 *)
 	usage
