@@ -132,24 +132,11 @@ finish_dotfiles() {
 	cd "${_dotdir}" && du -d1 | sort -h
 }
 
-prepare_backup() {
-	if pgrep mutt > /dev/null ; then
-		echo "mutt is still running."
-		exit 1
-	fi
-}
-
 prepare_dotfiles() {
-	if pgrep mutt > /dev/null ; then
-		echo "mutt is still running."
-		exit 1
-	else
-		_dotdir="$HOME"/dotfiles/"$(date +%F)"
-		export _dotdir
-		[ -d "${_dotdir}" ] \
-			&& echo "${_dotdir} already exists. Do some clean-up!" \
-			&& exit 1
-	fi
+	_dotdir="$HOME"/dotfiles/"$(date +%F)"
+	[ -d "${_dotdir}" ] \
+		&& echo "${_dotdir} already exists. Do some clean-up!" \
+		&& exit 1
 
 	mkdir -p "${_dotdir}" \
 		&& printf "${_good}%s${_rset}\n" "Created ${_dotdir}" \
@@ -169,7 +156,6 @@ set +e
 
 case $1 in
 all)
-	prepare_backup
 	backup "$@"
 	;;
 bitrot)
