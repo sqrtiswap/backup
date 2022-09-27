@@ -88,6 +88,8 @@ collect_dotfiles() {
 		printf "${_fail}[5/5] ----- Collecting data failed.${_rset}\n\n"
 		exit 1
 	fi
+
+	cd "${_dotdir}" && du -d1 | sort -h
 }
 
 prepare_backup() {
