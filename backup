@@ -16,6 +16,9 @@ command -v doas > /dev/null \
 _resourcedir="$HOME"/sources/backup
 
 backup() {
+	nr_of_reports="$(grep -c "$(date +%F)" "$TODODIR"/report.txt)"
+	[ "${nr_of_reports}" -lt 1 ] && todo -q report
+
 	[ -n "$2" ] && _mntpoint="$2" || exit 1
 	dirlist="${_resourcedir}"/list-backup.txt
 	nr=$(grep -c '' "$dirlist")
@@ -86,6 +89,11 @@ collect_config() {
 	# collect just the config from ~/.ssh/
 	mkdir -p "${_configdir}"/.ssh && cp "$HOME"/.ssh/config "${_configdir}"/.ssh/config
 
+	# dump notmuch database
+	notmuch dump --output="${_configdir}"/notmuch-dump.txt
+}
+
+collect_gpg() {
 	# collect just the configs from ~/.gnupg/
 	_gpgdir="${_configdir}"/.gpg
 	mkdir -p "${_gpgdir}" || exit 1
@@ -186,46 +194,6 @@ collect_installs() {
 	fi
 }
 
-collect_data() {
-	echo "Start collecting data:"
-	_datadir="${_dotdir}"/data
-
-	mkdir "${_datadir}" \
-		&& echo "----> [1/7] ${_datadir} created." \
-		|| exit 1
-
-	cp -R \
-		"$HOME"/.reminders \
-		"$HOME"/.include-remind \
-		"${_datadir}"/ \
-		&& echo "----> [2/7] calendar data collected." \
-		|| exit 1
-
-	nr_of_reports="$(grep -c "$(date +%F)" "$TODODIR"/report.txt)"
-	[ "${nr_of_reports}" -lt 1 ] && todo -q report
-	cp -R "$TODODIR" "${_datadir}" \
-		&& echo "----> [3/7] todo data collected." \
-		|| exit 1
-
-	cp -R \
-		"$HOME"/.gnupg \
-		"${_datadir}" \
-		&& echo "----> [4/7] gpg collected." \
-		|| exit 1
-
-	mv "$HOME"/Downloads/bookmarks.html "${_datadir}"/torbookmarks.html \
-		&& echo "----> [5/7] torbookmarks collected." \
-		|| exit 1
-
-	mv "$HOME"/Downloads/bookmarks_"$(date +%d_%m_%Y)".html "${_datadir}"/chromebookmarks.html \
-		&& echo "----> [6/7] chromebookmarks collected." \
-		|| exit 1
-
-	notmuch dump --output="${_datadir}"/notmuch-dump.txt \
-		&& echo "----> [7/7] notmuch dumped." \
-		|| exit 1
-}
-
 finish_dotfiles() {
 	cd "${_dotdir}" && du -d1 | sort -h
 }
@@ -239,6 +207,8 @@ prepare_dotfiles() {
 		mkdir -p "${_dotdir}"
 		printf "${_good}%s${_rset}\n" "Created ${_dotdir}"
 	fi
+	mv "$HOME"/Downloads/bookmarks.html "${_dotdir}"/torbookmarks.html
+	mv "$HOME"/Downloads/bookmarks_"$(date +%d_%m_%Y)".html "${_dotdir}"/chromebookmarks.html
 }
 
 usage() { cat << USAGE
@@ -262,7 +232,7 @@ bitrot)
 dotfiles)
 	prepare_dotfiles
 	collect_config
-	collect_data
+	collect_gpg
 	collect_privconfig
 	collect_installs
 	finish_dotfiles
