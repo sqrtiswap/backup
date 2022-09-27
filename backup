@@ -137,12 +137,9 @@ prepare_dotfiles() {
 			&& exit 1
 	fi
 
-	if mkdir -p "${_dotdir}" ; then
-		printf "${_good}[1/5] ----- Created ${_dotdir}.${_rset}\n\n"
-	else
-		printf "${_fail}[1/5] ----- Creating ${_dotdir} failed.${_rset}\n\n"
-		exit 1
-	fi
+	mkdir -p "${_dotdir}" \
+		&& printf "${_good}%s${_rset}\n" "Created ${_dotdir}" \
+		|| exit 1
 }
 
 usage() { cat << USAGE
