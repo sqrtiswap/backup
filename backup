@@ -69,7 +69,9 @@ collect_config() {
 			printf "${_fail}%s${_rset}\n" "$c does not exist."
 		fi
 	done < "$configlist"
+}
 
+collect_home() {
 	# collect stuff in ~/
 	homelist="${_resourcedir}"/list-home.txt
 	nr=$(grep -c '' "$homelist")
@@ -85,7 +87,9 @@ collect_config() {
 			printf "${_fail}%s${_rset}\n" "$c does not exist."
 		fi
 	done < "$homelist"
+}
 
+collect_special() {
 	# collect just the config from ~/.ssh/
 	mkdir -p "${_configdir}"/.ssh && cp "$HOME"/.ssh/config "${_configdir}"/.ssh/config
 
@@ -232,6 +236,8 @@ bitrot)
 dotfiles)
 	prepare_dotfiles
 	collect_config
+	collect_home
+	collect_special
 	collect_gpg
 	collect_privconfig
 	collect_installs
