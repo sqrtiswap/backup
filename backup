@@ -85,6 +85,24 @@ collect_config() {
 
 	# collect just the config from ~/.ssh/
 	mkdir -p "${_configdir}"/.ssh && cp "$HOME"/.ssh/config "${_configdir}"/.ssh/config
+
+	# collect just the configs from ~/.gnupg/
+	_gpgdir="${_configdir}"/.gpg
+	mkdir -p "${_gpgdir}" || exit 1
+	gpglist="${_resourcedir}"/list-gpg.txt
+	nr=$(grep -c '' "$gpglist")
+	i=0
+
+	while IFS= read -r g ; do
+		if [ -e "$HOME"/.gnupg/"$g" ] ; then
+			i=$((i+1))
+			cp "$g" "${_gpgdir}" \
+				&& printf "${_good}%s${_rset}\n" "collected $i/${nr} ($HOME/.gnupg/$g)" \
+				|| exit 1
+		else
+			printf "${_fail}%s${_rset}\n" "$g does not exist."
+		fi
+	done < "$gpglist"
 }
 
 collect_privconfig() {
