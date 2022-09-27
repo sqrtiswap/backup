@@ -134,13 +134,13 @@ finish_dotfiles() {
 
 prepare_dotfiles() {
 	_dotdir="$HOME"/dotfiles/"$(date +%F)"
-	[ -d "${_dotdir}" ] \
-		&& echo "${_dotdir} already exists. Do some clean-up!" \
-		&& exit 1
-
-	mkdir -p "${_dotdir}" \
-		&& printf "${_good}%s${_rset}\n" "Created ${_dotdir}" \
-		|| exit 1
+	if [ -d "${_dotdir}" ] ; then
+		echo "${_dotdir} already exists. Do some clean-up!"
+		exit 1
+	else
+		mkdir -p "${_dotdir}"
+		printf "${_good}%s${_rset}\n" "Created ${_dotdir}"
+	fi
 }
 
 usage() { cat << USAGE
