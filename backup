@@ -48,13 +48,8 @@ check_bitrot() {
 
 collect_config() {
 	# collect stuff in ~/.config/
-	printf "%s\n" "---> Start collecting configurations:"
-	_configdir="${_dotdir}"/configurations
-	mkdir -p "${_configdir}" \
-		&& printf "${_good}%s${_rset}\n" "Created ${_configdir}" \
-		|| exit 1
-
-	mkdir -p "${_configdir}"/.config || exit 1
+	_configdir="${_dotdir}"/.config
+	mkdir -p "${_configdir}" || exit 1
 	configlist="${_resourcedir}"/list-config.txt
 	nr=$(grep -c '' "$configlist")
 	i=0
@@ -62,7 +57,7 @@ collect_config() {
 	while IFS= read -r c ; do
 		if [ -e "$HOME"/.config/"$c" ] ; then
 			i=$((i+1))
-			cp -R "$HOME"/.config/"$c" "${_configdir}"/.config \
+			cp -R "$HOME"/.config/"$c" "${_configdir}" \
 				&& printf "${_good}%s${_rset}\n" "collected $i/${nr} ($HOME/.config/$c)" \
 				|| exit 1
 		else
@@ -73,6 +68,8 @@ collect_config() {
 
 collect_home() {
 	# collect stuff in ~/
+	_homedir="${_dotdir}"/home
+	mkdir -p "${_homedir}" || exit 1
 	homelist="${_resourcedir}"/list-home.txt
 	nr=$(grep -c '' "$homelist")
 	i=0
@@ -80,7 +77,7 @@ collect_home() {
 	while IFS= read -r h ; do
 		if [ -e "$HOME"/"$h" ] ; then
 			i=$((i+1))
-			cp -R "$HOME"/"$c" "${_configdir}" \
+			cp -R "$HOME"/"$c" "${_homedir}" \
 				&& printf "${_good}%s${_rset}\n" "collected $i/${nr} ($HOME/$h)" \
 				|| exit 1
 		else
@@ -91,15 +88,15 @@ collect_home() {
 
 collect_special() {
 	# collect just the config from ~/.ssh/
-	mkdir -p "${_configdir}"/.ssh && cp "$HOME"/.ssh/config "${_configdir}"/.ssh/config
+	mkdir -p "${_homedir}"/.ssh && cp "$HOME"/.ssh/config "${_homedir}"/.ssh/config
 
 	# dump notmuch database
-	notmuch dump --output="${_configdir}"/notmuch-dump.txt
+	notmuch dump --output="${_homedir}"/notmuch-dump.txt
 }
 
 collect_gpg() {
 	# collect just the configs from ~/.gnupg/
-	_gpgdir="${_configdir}"/.gpg
+	_gpgdir="${_homedir}"/.gpg
 	mkdir -p "${_gpgdir}" || exit 1
 	gpglist="${_resourcedir}"/list-gpg.txt
 	nr=$(grep -c '' "$gpglist")
