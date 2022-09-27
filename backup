@@ -20,15 +20,9 @@ fi
 
 _resourcedir="$HOME"/sources/backup
 
-dirlist="${_resourcedir}"/list-backup.txt
-
 backup() {
-	if [ -n "$2" ] ; then
-		_mntpoint="$2"
-	else
-		exit 1
-	fi
-
+	[ -n "$2" ] && _mntpoint="$2" || exit 1
+	dirlist="${_resourcedir}"/list-backup.txt
 	nr=$(grep -c '' "$dirlist")
 	i=0
 
