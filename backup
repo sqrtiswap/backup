@@ -32,7 +32,7 @@ backup() {
 			&& printf "${_good}%s${_rset}\n\n" "---> Synced $i/${nr}" \
 			|| exit 1
 	done < "$dirlist"
-	[ -f "$HOME"/mbox ] && cp "$HOME"/mbox "${_mntpoint}"
+	[ -f "$HOME"/mbox ] && cp -vf "$HOME"/mbox "${_mntpoint}"
 }
 
 check_bitrot() {
