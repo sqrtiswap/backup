@@ -115,60 +115,43 @@ collect_gpg() {
 }
 
 collect_privconfig() {
-	echo "Start collecting privileged configurations:"
+	printf "%s\n" "---> Start collecting privileged configurations:"
 	_privdir="${_dotdir}"/PRIVILEGED
 
-	mkdir -p "${_privdir}"/etc/ \
-		&& echo "----> [1/4] ${_privdir} created." \
-		|| exit 1
+	mkdir -p "${_privdir}"/etc/ || exit 1
+	privlist="${_resourcedir}"/list-privconfig-etc.txt
+	nr=$(grep -c '' "$privlist")
+	i=0
+	while IFS= read -r p ; do
+		if [ -e /etc/"$p" ] ; then
+			i=$((i+1))
+			cp /etc/"$p" "${_privdir}"/etc/ \
+				&& printf "${_good}%s${_rset}\n" "collected $i/${nr} (/etc/$p)" \
+				|| exit 1
+		else
+			printf "${_fail}%s${_rset}\n" "$p does not exist."
+		fi
+	done < "$privlist"
 
-	"${_doas}" cp \
-		/etc/doas.conf \
-		/etc/freshclam.conf \
-		/etc/fstab \
-		"${_privdir}"/etc/ \
-		&& echo "----> [2/4] General /etc/ collected." \
-		|| exit 1
-
-	if [ "$(uname -s)" = "OpenBSD" ] ; then
-		"${_doas}" cp \
-			/etc/login.conf \
-			/etc/man.conf \
-			/etc/mixerctl.conf \
-			/etc/ntpd.conf \
-			/etc/sndioctl.conf \
-			/etc/sysclean.ignore \
-			/etc/wpa_supplicant.conf \
-			/etc/wsconsctl.conf \
-			"${_privdir}"/etc/ \
-			&& echo "--------> [1/3] OpenBSD specific /etc/ collected." \
-			|| exit 1
-
-		mkdir -p "${_privdir}"/etc/X11/xenodm/ \
-			&& echo "--------> [2/3] Xenocara's directory created." \
-			|| exit 1
-
-		"${_doas}" cp \
-			/etc/X11/xenodm/Xresources* \
-			/etc/X11/xenodm/Xsetup_0 \
-			/etc/X11/xenodm/GiveConsole \
-			"${_privdir}"/etc/X11/xenodm/ \
-			&& echo "--------> [3/3] /etc/X11/xenodm/ collected." \
-			|| exit 1
-
-		echo "----> [3/4] OpenBSD specific privileged configs collected."
-	elif [ "$(awk -F "(\"| )" 'NR == 1 { print $2 }' /etc/os-release)" = "Fedora" ] ; then
-		"${_doas}" cp \
-			/etc/man_db.conf \
-			"${_privdir}"/etc/ \
-			&& echo "----> [3/4] Fedora specific /etc/ collected." \
-			|| exit 1
-	else
-		echo "OS is unknown. Aborting..." && exit 1
+	if [ -e /etc/X11/xenodm ] ; then
+		mkdir -p "${_privdir}"/etc/X11/xenodm/ || exit 1
+		xenocaralist="${_resourcedir}"/list-privconfig-etc.txt
+		nr=$(grep -c '' "$xenocaralist")
+		i=0
+		while IFS= read -r x ; do
+			if [ -e /etc/X11/xenodm/"$x" ] ; then
+				i=$((i+1))
+				cp /etc/X11/xenodm/"$x" "${_privdir}"/etc/X11/xenodm \
+					&& printf "${_good}%s${_rset}\n" "collected $i/${nr} (/etc/X11/xenodm/$x)" \
+					|| exit 1
+			else
+				printf "${_fail}%s${_rset}\n" "$x does not exist."
+			fi
+		done < "$xenocaralist"
 	fi
 
 	"${_doas}" chown -R "$USER:$USER" "${_privdir}" \
-		&& echo "----> [4/4] changed ownership of privileged configs." \
+		&& printf "${_good}%s${_rset}\n" "changed ownership of privileged config" \
 		|| exit 1
 }
 
