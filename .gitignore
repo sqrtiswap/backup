@@ -1,7 +1,1 @@
-list-backup.txt
-list-bitrot.txt
-list-config.txt
-list-gpg.txt
-list-home.txt
-list-privconfig-etc.txt
-list-privconfig-etc-X11-xenodm.txt
+list*.txt
