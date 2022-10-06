@@ -77,11 +77,11 @@ collect_home() {
 	while IFS= read -r h ; do
 		if [ -e "$HOME"/"$h" ] ; then
 			i=$((i+1))
-			cp -R "$HOME"/"$c" "${_homedir}" \
+			cp -R "$HOME"/"$h" "${_homedir}" \
 				&& printf "${_good}%s${_rset}\n" "collected $i/${nr} ($HOME/$h)" \
 				|| exit 1
 		else
-			printf "${_fail}%s${_rset}\n" "$c does not exist."
+			printf "${_fail}%s${_rset}\n" "$h does not exist."
 		fi
 	done < "$homelist"
 }
