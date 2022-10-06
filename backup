@@ -179,7 +179,7 @@ collect_installs() {
 }
 
 finish_dotfiles() {
-	cd "${_dotdir}" && du -d1 | sort -h
+	cd "$HOME"/dotfiles && du -d1 | sort -h
 }
 
 prepare_dotfiles() {
