@@ -125,7 +125,7 @@ collect_privconfig() {
 	while IFS= read -r p ; do
 		if [ -e /etc/"$p" ] ; then
 			i=$((i+1))
-			cp /etc/"$p" "${_privdir}"/etc/ \
+			"${_doas}" cp /etc/"$p" "${_privdir}"/etc/ \
 				&& printf "${_good}%s${_rset}\n" "collected $i/${nr} (/etc/$p)" \
 				|| exit 1
 		else
@@ -141,7 +141,7 @@ collect_privconfig() {
 		while IFS= read -r x ; do
 			if [ -e /etc/X11/xenodm/"$x" ] ; then
 				i=$((i+1))
-				cp /etc/X11/xenodm/"$x" "${_privdir}"/etc/X11/xenodm \
+				"${_doas}" cp /etc/X11/xenodm/"$x" "${_privdir}"/etc/X11/xenodm \
 					&& printf "${_good}%s${_rset}\n" "collected $i/${nr} (/etc/X11/xenodm/$x)" \
 					|| exit 1
 			else
