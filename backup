@@ -21,7 +21,7 @@ backup() {
 
 	[ -n "$2" ] && _mntpoint="$2" || exit 1
 	dirlist="${_resourcedir}"/list-backup.txt
-	nr=$(grep -c '' "$dirlist")
+	nr=$(($(grep -c '' "$dirlist")+1))
 	i=0
 
 	while IFS= read -r d ; do
@@ -30,7 +30,16 @@ backup() {
 			&& printf "${_good}%s${_rset}\n\n" "---> Synced $i/${nr}" \
 			|| exit 1
 	done < "$dirlist"
-	[ -f "$HOME"/mbox ] && cp -vf "$HOME"/mbox "${_mntpoint}"
+
+	if [ -f "$HOME"/mbox ] ; then
+		cp -vf "$HOME"/mbox "${_mntpoint}" \
+			&& printf "${_good}%s${_rset}\n\n" "---> Synced ${nr}/${nr}" \
+			|| exit 1
+	else
+		printf "%s does not exist. Nothing to backup.\n" "$HOME/mbox" \
+			&& printf "${_good}%s${_rset}\n\n" "---> Synced ${nr}/${nr}" \
+			|| exit 1
+	fi
 }
 
 check_bitrot() {
