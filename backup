@@ -183,7 +183,7 @@ collect_installs() {
 			&& printf "${_good}%s${_rset}\n" "collected Flatpaks packages" \
 			|| exit 1
 	else
-		printf "${_fail}%s${_rset}\n" "OS is unknown. Aborting..." && exit 1
+		printf "${_fail}%s${_rset}\n" "OS is unknown. No packages collected."
 	fi
 }
 
