@@ -26,7 +26,7 @@ backup() {
 
 	while IFS= read -r d ; do
 		i=$((i+1))
-		"$RSYNC" -av --delete "$HOME/$d" "${_mntpoint}/" \
+		"$RSYNC" -av --delete --exclude=.DS_Store "$HOME/$d" "${_mntpoint}/" \
 			&& printf "${_good}%s${_rset}\n\n" "---> Synced $i/${nr} ($d)" \
 			|| exit 1
 	done < "$dirlist"
