@@ -27,17 +27,17 @@ backup() {
 	while IFS= read -r d ; do
 		i=$((i+1))
 		"$RSYNC" -av --delete "$HOME/$d" "${_mntpoint}/" \
-			&& printf "${_good}%s${_rset}\n\n" "---> Synced $i/${nr}" \
+			&& printf "${_good}%s${_rset}\n\n" "---> Synced $i/${nr} ($d)" \
 			|| exit 1
 	done < "$dirlist"
 
 	if [ -f "$HOME"/mbox ] ; then
 		cp -vf "$HOME"/mbox "${_mntpoint}" \
-			&& printf "${_good}%s${_rset}\n\n" "---> Synced ${nr}/${nr}" \
+			&& printf "${_good}%s${_rset}\n\n" "---> Synced ${nr}/${nr} (mbox)" \
 			|| exit 1
 	else
 		printf "%s does not exist. Nothing to backup.\n" "$HOME/mbox" \
-			&& printf "${_good}%s${_rset}\n\n" "---> Synced ${nr}/${nr}" \
+			&& printf "${_good}%s${_rset}\n\n" "---> Synced ${nr}/${nr} (mbox)" \
 			|| exit 1
 	fi
 }
