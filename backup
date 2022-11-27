@@ -42,6 +42,15 @@ backup() {
 	fi
 }
 
+backup_restic() {
+	[ -n "$2" ] && _mntpoint="$2" || exit 1
+	restic backup \
+		--repo="${_mntpoint}" \
+		--verbose \
+		--exclude-file="${_resourcedir}"/list-exclude.txt \
+		--files-from-verbatim "${_resourcedir}"/restic-include.txt
+}
+
 check_bitrot() {
 	checklist="${_resourcedir}"/list-bitrot.txt
 	nr=$(grep -c '' "$checklist")
@@ -206,9 +215,10 @@ prepare_dotfiles() {
 
 usage() { cat << USAGE
 ${0##*/} - a selection of scripts for reliable backups
-usage: ${0##*/}	all [dir] -> backup all directories to [dir]
-		bitrot    -> check for bitrot in selected directories
-		dotfiles  -> collect dotfiles"
+usage: ${0##*/}	all [dir]     -> backup all directories to [dir]
+		bitrot        -> check for bitrot in selected directories
+		dotfiles      -> collect dotfiles"
+		restic [repo] -> backup to a restic(1) [repo]
 USAGE
 	exit 1
 }
@@ -231,6 +241,9 @@ dotfiles)
 	collect_privconfig
 	collect_installs
 	finish_dotfiles
+	;;
+restic)
+	backup_restic "$@"
 	;;
 *)
 	usage
