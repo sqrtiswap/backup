@@ -1,8 +1,8 @@
 #!/bin/sh
 
-_fail="\033[31m"
-_good="\033[32m"
-_rset="\033[0m"
+_fail="\033[31m" # red
+_good="\033[32m" # green
+_rset="\033[0m"  # reset
 
 set -e
 
@@ -16,14 +16,15 @@ command -v doas > /dev/null \
 _resourcedir="$HOME"/sources/backup
 
 backup() {
+	# todo(1) report
 	nr_of_reports="$(grep -c "$(date +%F)" "$TODODIR"/report.txt)"
 	[ "${nr_of_reports}" -lt 1 ] && todo -q report
 
+	# backup with RSYNC
 	[ -n "$2" ] && _mntpoint="$2" || exit 1
 	dirlist="${_resourcedir}"/list-backup.txt
 	nr=$(($(grep -c '' "$dirlist")+1))
 	i=0
-
 	while IFS= read -r d ; do
 		i=$((i+1))
 		"$RSYNC" -av --delete --exclude-from="${_resourcedir}"/list-exclude.txt "$HOME/$d" "${_mntpoint}/" \
@@ -31,6 +32,7 @@ backup() {
 			|| exit 1
 	done < "$dirlist"
 
+	# backup ~/mbox if it exists
 	if [ -f "$HOME"/mbox ] ; then
 		cp -vf "$HOME"/mbox "${_mntpoint}" \
 			&& printf "${_good}%s${_rset}\n\n" "---> Synced ${nr}/${nr} (mbox)" \
@@ -43,6 +45,7 @@ backup() {
 }
 
 backup_restic() {
+	# backup with restic(1)
 	[ -n "$2" ] && _mntpoint="$2" || exit 1
 	restic backup \
 		--repo="${_mntpoint}" \
@@ -52,10 +55,10 @@ backup_restic() {
 }
 
 check_bitrot() {
+	# use bitrot(1) to detect errors in important directories
 	checklist="${_resourcedir}"/list-bitrot.txt
 	nr=$(grep -c '' "$checklist")
 	i=0
-
 	while IFS= read -r d ; do
 		i=$((i+1))
 		cd "$HOME"/"$d" && bitrot \
