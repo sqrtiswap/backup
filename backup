@@ -69,11 +69,8 @@ check_bitrot() {
 }
 
 collect_special() {
-	# collect just the config from ~/.ssh/
-	mkdir -p "${_homedir}"/.ssh && cp "$HOME"/.ssh/config "${_homedir}"/.ssh/config
-
 	# dump notmuch database
-	notmuch dump --output="${_homedir}"/notmuch-dump.txt
+	notmuch dump --output="${_datadir}"/notmuch-dump.txt
 }
 
 collect_gpg() {
@@ -135,11 +132,11 @@ all)
 	backup "$@"
 	;;
 prep)
+	collect_special
 	check_bitrot
 	collect_installs
 	;;
 dotfiles)
-	collect_special
 	collect_gpg
 	;;
 restic)
