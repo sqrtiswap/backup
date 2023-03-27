@@ -14,6 +14,7 @@ command -v doas > /dev/null \
 	|| _doas=sudo
 
 _resourcedir="$HOME"/sources/backup
+_datadir="$HOME"/sources/Dotfiles/Data
 
 backup() {
 	# todo(1) report
@@ -97,22 +98,20 @@ collect_gpg() {
 
 collect_installs() {
 	printf "%s\n" "---> Start collecting installed packages:"
-	_installdir="${_dotdir}"/installed_packages
-	mkdir -p "${_installdir}" \
-		&& printf "${_good}%s${_rset}\n" "Created ${_installdir}" \
-		|| exit 1
-
-	if [ "$(uname -s)" = "OpenBSD" ] ; then
-		pkg_info -tz >> "${_installdir}"/openbsd_pkgs.txt \
+	OS=$(uname -s)
+	if [ "${OS}" = "OpenBSD" ] ; then
+		pkg_info -tz >> "${_datadir}"/openbsd_pkgs.txt \
 			&& printf "${_good}%s${_rset}\n" "collected OpenBSD packages" \
 			|| exit 1
-	elif [ "$(awk -F "(\"| )" 'NR == 1 { print $2 }' /etc/os-release)" = "Fedora" ] ; then
-		dnf history userinstalled >> "${_installdir}"/fedora_pkgs.txt \
-			&& printf "${_good}%s${_rset}\n" "collected Fedora packages" \
-			|| exit 1
-		flatpak list --app >> "${_installdir}"/flatpaks.txt \
-			&& printf "${_good}%s${_rset}\n" "collected Flatpaks packages" \
-			|| exit 1
+	elif [ "${OS}" = "Linux" ] ; then
+		if [ "$(awk -F "(\"| )" 'NR == 1 { print $2 }' /etc/os-release)" = "Fedora" ] ; then
+			dnf history userinstalled >> "${_datadir}"/fedora_pkgs.txt \
+				&& printf "${_good}%s${_rset}\n" "collected Fedora packages" \
+				|| exit 1
+			flatpak list --app >> "${_datadir}"/flatpaks.txt \
+				&& printf "${_good}%s${_rset}\n" "collected Flatpaks packages" \
+				|| exit 1
+		fi
 	else
 		printf "${_fail}%s${_rset}\n" "OS is unknown. No packages collected."
 	fi
@@ -123,6 +122,7 @@ ${0##*/} - a selection of scripts for reliable backups
 usage: ${0##*/}	all [dir]     -> backup all directories to [dir]
 		bitrot        -> check for bitrot in selected directories
 		dotfiles      -> collect dotfiles"
+		prep          -> prepare for backing up
 		restic [repo] -> backup to a restic(1) [repo]
 USAGE
 	exit 1
@@ -134,13 +134,13 @@ case $1 in
 all)
 	backup "$@"
 	;;
-bitrot)
+prep)
 	check_bitrot
+	collect_installs
 	;;
 dotfiles)
 	collect_special
 	collect_gpg
-	collect_installs
 	;;
 restic)
 	backup_restic "$@"
