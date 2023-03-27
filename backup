@@ -67,26 +67,6 @@ check_bitrot() {
 	done < "$checklist"
 }
 
-collect_home() {
-	# collect stuff in ~/
-	_homedir="${_dotdir}"/home
-	mkdir -p "${_homedir}" || exit 1
-	homelist="${_resourcedir}"/list-home.txt
-	nr=$(grep -c '' "$homelist")
-	i=0
-
-	while IFS= read -r h ; do
-		if [ -e "$HOME"/"$h" ] ; then
-			i=$((i+1))
-			cp -R "$HOME"/"$h" "${_homedir}" \
-				&& printf "${_good}%s${_rset}\n" "collected $i/${nr} ($HOME/$h)" \
-				|| exit 1
-		else
-			printf "${_fail}%s${_rset}\n" "$h does not exist."
-		fi
-	done < "$homelist"
-}
-
 collect_special() {
 	# collect just the config from ~/.ssh/
 	mkdir -p "${_homedir}"/.ssh && cp "$HOME"/.ssh/config "${_homedir}"/.ssh/config
@@ -217,7 +197,6 @@ bitrot)
 	;;
 dotfiles)
 	prepare_dotfiles
-	collect_home
 	collect_special
 	collect_gpg
 	collect_privconfig
