@@ -73,26 +73,6 @@ collect_special() {
 	notmuch dump --output="${_datadir}"/notmuch-dump.txt
 }
 
-collect_gpg() {
-	# collect just the configs from ~/.gnupg/
-	_gpgdir="${_homedir}"/.gpg
-	mkdir -p "${_gpgdir}" || exit 1
-	gpglist="${_resourcedir}"/list-gpg.txt
-	nr=$(grep -c '' "$gpglist")
-	i=0
-
-	while IFS= read -r g ; do
-		if [ -e "$HOME"/.gnupg/"$g" ] ; then
-			i=$((i+1))
-			cp "$HOME"/.gnupg/"$g" "${_gpgdir}" \
-				&& printf "${_good}%s${_rset}\n" "collected $i/${nr} ($HOME/.gnupg/$g)" \
-				|| exit 1
-		else
-			printf "${_fail}%s${_rset}\n" "$g does not exist."
-		fi
-	done < "$gpglist"
-}
-
 collect_installs() {
 	printf "%s\n" "---> Start collecting installed packages:"
 	OS=$(uname -s)
@@ -118,7 +98,6 @@ usage() { cat << USAGE
 ${0##*/} - a selection of scripts for reliable backups
 usage: ${0##*/}	all [dir]     -> backup all directories to [dir]
 		bitrot        -> check for bitrot in selected directories
-		dotfiles      -> collect dotfiles"
 		prep          -> prepare for backing up
 		restic [repo] -> backup to a restic(1) [repo]
 USAGE
@@ -135,9 +114,6 @@ prep)
 	collect_special
 	check_bitrot
 	collect_installs
-	;;
-dotfiles)
-	collect_gpg
 	;;
 restic)
 	backup_restic "$@"
