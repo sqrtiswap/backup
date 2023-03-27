@@ -118,10 +118,6 @@ collect_installs() {
 	fi
 }
 
-finish_dotfiles() {
-	cd "$HOME"/dotfiles && du -h -d1 | sort -h
-}
-
 prepare_dotfiles() {
 	_dotdir="$HOME"/dotfiles/"$(date +%F)"
 	if [ -d "${_dotdir}" ] ; then
@@ -159,7 +155,6 @@ dotfiles)
 	collect_special
 	collect_gpg
 	collect_installs
-	finish_dotfiles
 	;;
 restic)
 	backup_restic "$@"
