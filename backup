@@ -118,19 +118,6 @@ collect_installs() {
 	fi
 }
 
-prepare_dotfiles() {
-	_dotdir="$HOME"/dotfiles/"$(date +%F)"
-	if [ -d "${_dotdir}" ] ; then
-		echo "${_dotdir} already exists. Do some clean-up!"
-		exit 1
-	else
-		mkdir -p "${_dotdir}"
-		printf "${_good}%s${_rset}\n" "Created ${_dotdir}"
-	fi
-	mv "$HOME"/Downloads/bookmarks.html "${_dotdir}"/torbookmarks.html
-	mv "$HOME"/Downloads/bookmarks_"$(date +%d_%m_%Y)".html "${_dotdir}"/chromebookmarks.html
-}
-
 usage() { cat << USAGE
 ${0##*/} - a selection of scripts for reliable backups
 usage: ${0##*/}	all [dir]     -> backup all directories to [dir]
@@ -151,7 +138,6 @@ bitrot)
 	check_bitrot
 	;;
 dotfiles)
-	prepare_dotfiles
 	collect_special
 	collect_gpg
 	collect_installs
