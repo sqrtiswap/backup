@@ -95,47 +95,6 @@ collect_gpg() {
 	done < "$gpglist"
 }
 
-collect_privconfig() {
-	printf "%s\n" "---> Start collecting privileged configurations:"
-	_privdir="${_dotdir}"/PRIVILEGED
-
-	mkdir -p "${_privdir}"/etc/ || exit 1
-	privlist="${_resourcedir}"/list-privconfig-etc.txt
-	nr=$(grep -c '' "$privlist")
-	i=0
-	while IFS= read -r p ; do
-		if [ -e /etc/"$p" ] ; then
-			i=$((i+1))
-			"${_doas}" cp /etc/"$p" "${_privdir}"/etc/ \
-				&& printf "${_good}%s${_rset}\n" "collected $i/${nr} (/etc/$p)" \
-				|| exit 1
-		else
-			printf "${_fail}%s${_rset}\n" "$p does not exist."
-		fi
-	done < "$privlist"
-
-	if [ -e /etc/X11/xenodm ] ; then
-		mkdir -p "${_privdir}"/etc/X11/xenodm/ || exit 1
-		xenocaralist="${_resourcedir}"/list-privconfig-etc.txt
-		nr=$(grep -c '' "$xenocaralist")
-		i=0
-		while IFS= read -r x ; do
-			if [ -e /etc/X11/xenodm/"$x" ] ; then
-				i=$((i+1))
-				"${_doas}" cp /etc/X11/xenodm/"$x" "${_privdir}"/etc/X11/xenodm \
-					&& printf "${_good}%s${_rset}\n" "collected $i/${nr} (/etc/X11/xenodm/$x)" \
-					|| exit 1
-			else
-				printf "${_fail}%s${_rset}\n" "$x does not exist."
-			fi
-		done < "$xenocaralist"
-	fi
-
-	"${_doas}" chown -R "$USER:$USER" "${_privdir}" \
-		&& printf "${_good}%s${_rset}\n" "changed ownership of privileged config" \
-		|| exit 1
-}
-
 collect_installs() {
 	printf "%s\n" "---> Start collecting installed packages:"
 	_installdir="${_dotdir}"/installed_packages
@@ -199,7 +158,6 @@ dotfiles)
 	prepare_dotfiles
 	collect_special
 	collect_gpg
-	collect_privconfig
 	collect_installs
 	finish_dotfiles
 	;;
