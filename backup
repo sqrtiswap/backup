@@ -68,6 +68,14 @@ check_bitrot() {
 	done < "$checklist"
 }
 
+checkout_restic() {
+	_repo="$2"
+	_snapshot="$3"
+	_target="$4"
+	_path="$5"
+	restic -r "${_repo}" restore "${_snapshot}" --target "${_target}" --include "${_path}"
+}
+
 collect_special() {
 	# dump notmuch database
 	notmuch dump --output="${_datadir}"/notmuch-dump.txt
@@ -96,10 +104,11 @@ collect_installs() {
 
 usage() { cat << USAGE
 ${0##*/} - a selection of scripts for reliable backups
-usage: ${0##*/}	all [dir]     -> backup all directories to [dir]
-		bitrot        -> check for bitrot in selected directories
-		prep          -> prepare for backing up
-		restic [repo] -> backup to a restic(1) [repo]
+usage: ${0##*/}	all [dir]                 -> backup all directories to [dir]
+		bitrot                    -> check for bitrot in selected directories
+		checkout_restic [options] -> Checkout restic snapshot data with variety of options (currently not documented)
+		prep                      -> prepare for backing up
+		restic [repo]             -> backup to a restic(1) [repo]
 USAGE
 	exit 1
 }
@@ -112,6 +121,9 @@ all)
 	;;
 bitrot)
 	check_bitrot
+	;;
+checkout)
+	checkout_restic "$@"
 	;;
 prep)
 	collect_special
