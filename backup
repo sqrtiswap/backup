@@ -110,6 +110,9 @@ case $1 in
 all)
 	backup "$@"
 	;;
+bitrot)
+	check_bitrot
+	;;
 prep)
 	collect_special
 	check_bitrot
