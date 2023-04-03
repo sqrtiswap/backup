@@ -100,6 +100,11 @@ collect_installs() {
 	else
 		printf "${_fail}%s${_rset}\n" "OS is unknown. No packages collected."
 	fi
+	if command -v brew > /dev/null ; then
+		brew bundle dump --force --file="${_datadir}"/Brewfile \
+			&& printf "${_good}%s${_rset}\n" "Brewfile created" \
+			|| exit 1
+	fi
 }
 
 usage() { cat << USAGE
