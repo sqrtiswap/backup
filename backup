@@ -78,7 +78,9 @@ checkout_restic() {
 
 collect_special() {
 	# dump notmuch database
-	notmuch dump --output="${_datadir}"/notmuch-dump.txt
+	notmuch dump --output="${_datadir}"/notmuch-dump.txt \
+		&& printf "${_good}%s${_rset}\n" "notmuch database dumped" \
+		|| exit 1
 }
 
 collect_installs() {
