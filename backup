@@ -99,6 +99,12 @@ collect_installs() {
 				&& printf "${_good}%s${_rset}\n" "collected Flatpaks packages" \
 				|| exit 1
 		fi
+	elif [ "${OS}" = "Darwin" ] ; then
+		if command -v mas > /dev/null ; then
+			mas list > "${_datadir}"/mascli_installs.txt \
+			&& printf "${_good}%s${_rset}\n" "mas installs collected" \
+			|| exit 1
+		fi
 	else
 		printf "${_fail}%s${_rset}\n" "OS is unknown. No packages collected."
 	fi
