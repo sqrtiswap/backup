@@ -39,9 +39,11 @@ else
 fi
 
 backup() {
-	# todo(1) report
-	nr_of_reports="$(grep -c "$(date +%F)" "$TODODIR"/report.txt)"
-	[ "${nr_of_reports}" -lt 1 ] && todo -q report
+	if command -v todo > /dev/null ; then
+		# todo(1) report
+		nr_of_reports="$(grep -c "$(date +%F)" "$TODODIR"/report.txt)"
+		[ "${nr_of_reports}" -lt 1 ] && todo -q report
+	fi
 
 	# backup with RSYNC
 	[ -n "$2" ] && _mntpoint="$2" || exit 1
@@ -99,10 +101,12 @@ checkout_restic() {
 }
 
 collect_special() {
-	# dump notmuch database
-	notmuch dump --output="${_datadir}"/notmuch-dump.txt \
-		&& printf "${_good}%s${_rset}\n" "notmuch database dumped" \
-		|| exit 1
+	if command -v notmuch > /dev/null ; then
+		# dump notmuch database
+		notmuch dump --output="${_datadir}"/notmuch-dump.txt \
+			&& printf "${_good}%s${_rset}\n" "notmuch database dumped" \
+			|| exit 1
+	fi
 }
 
 collect_installs() {
