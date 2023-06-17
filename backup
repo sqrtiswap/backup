@@ -24,8 +24,19 @@ command -v rsync > /dev/null \
 	&& RSYNC='rsync' \
 	|| RSYNC='openrsync'
 
-_resourcedir="$HOME"/sources/backup
-_datadir="$HOME"/sources/Dotfiles/Data
+if [ -n "$BACKUP_LISTDIR" ] ; then
+	_listdir="$BACKUP_LISTDIR"
+else
+	printf "${_fail}%s${_rset}%s\n" "Error: " "Specify location of backup lists with BACKUP_LISTDIR."
+	exit 1
+fi
+
+if [ -n "$BACKUP_DATADIR" ] ; then
+	_datadir="$BACKUP_DATADIR"
+else
+	printf "${_fail}%s${_rset}%s\n" "Error: " "Specify location of backup lists with BACKUP_DATADIR."
+	exit 1
+fi
 
 backup() {
 	# todo(1) report
@@ -34,12 +45,12 @@ backup() {
 
 	# backup with RSYNC
 	[ -n "$2" ] && _mntpoint="$2" || exit 1
-	dirlist="${_resourcedir}"/list-backup.txt
+	dirlist="${_listdir}"/list-backup.txt
 	nr=$(($(grep -c '' "$dirlist")+1))
 	i=0
 	while IFS= read -r d ; do
 		i=$((i+1))
-		"$RSYNC" -av --delete --exclude-from="${_resourcedir}"/list-exclude.txt "$HOME/$d" "${_mntpoint}/" \
+		"$RSYNC" -av --delete --exclude-from="${_listdir}"/list-exclude.txt "$HOME/$d" "${_mntpoint}/" \
 			&& printf "${_good}%s${_rset}\n\n" "---> Synced $i/${nr} ($d)" \
 			|| exit 1
 	done < "$dirlist"
@@ -62,13 +73,13 @@ backup_restic() {
 	restic backup \
 		--repo="${_mntpoint}" \
 		--verbose \
-		--exclude-file="${_resourcedir}"/list-exclude.txt \
-		--files-from-verbatim "${_resourcedir}"/list-restic.txt
+		--exclude-file="${_listdir}"/list-exclude.txt \
+		--files-from-verbatim "${_listdir}"/list-restic.txt
 }
 
 check_bitrot() {
 	# use bitrot(1) to detect errors in important directories
-	checklist="${_resourcedir}"/list-bitrot.txt
+	checklist="${_listdir}"/list-bitrot.txt
 	nr=$(grep -c '' "$checklist")
 	i=0
 	while IFS= read -r d ; do
