@@ -1,5 +1,13 @@
 # backup
 
+> Computer users fall into two groups:-
+> 
+> those that do backups
+> 
+> those that have never had a hard drive fail.
+> 
+> \- [NeddySeagoon](https://forums.gentoo.org/profile.php?mode=viewprofile&u=24240)
+
 Script to simplify my backup process
 
 ## Requirements & optional additions
