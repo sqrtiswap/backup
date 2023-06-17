@@ -23,9 +23,6 @@ set -e
 command -v rsync > /dev/null \
 	&& RSYNC='rsync' \
 	|| RSYNC='openrsync'
-command -v doas > /dev/null \
-	&& _doas=doas \
-	|| _doas=sudo
 
 _resourcedir="$HOME"/sources/backup
 _datadir="$HOME"/sources/Dotfiles/Data
