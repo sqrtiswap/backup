@@ -17,7 +17,7 @@ make uninstall
 - `list-backup.txt`: Directories to backup with `rsync(1)` or `openrsync(1)` (depending on what's installed)
 - `list-bitrot.txt`: Directories to run [bitrot](https://github.com/ambv/bitrot) on
 - `list-exclude.txt`: Patterns of files/directories to exclude in all backups, e.g. `.DS_Store`, `venv`, etc.
-- `restic-include.txt`: Directories to backup with `restic(1)`
+- `list-restic.txt`: Directories to backup with `restic(1)`
 
 ```shell
 backup help

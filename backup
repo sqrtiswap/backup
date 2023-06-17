@@ -63,7 +63,7 @@ backup_restic() {
 		--repo="${_mntpoint}" \
 		--verbose \
 		--exclude-file="${_resourcedir}"/list-exclude.txt \
-		--files-from-verbatim "${_resourcedir}"/restic-include.txt
+		--files-from-verbatim "${_resourcedir}"/list-restic.txt
 }
 
 check_bitrot() {
