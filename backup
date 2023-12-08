@@ -113,21 +113,21 @@ collect_installs() {
 	printf "%s\n" "---> Start collecting installed packages:"
 	OS=$(uname -s)
 	if [ "${OS}" = "OpenBSD" ] ; then
-		pkg_info -tz >> "${_datadir}"/openbsd_pkgs.txt \
+		pkg_info -tz >> "${_datadir}"/intalls/openbsd-pkg.txt \
 			&& printf "${_good}%s${_rset}\n" "collected OpenBSD packages" \
 			|| exit 1
 	elif [ "${OS}" = "Linux" ] ; then
 		if [ "$(awk -F "(\"| )" 'NR == 1 { print $2 }' /etc/os-release)" = "Fedora" ] ; then
-			dnf history userinstalled >> "${_datadir}"/fedora_pkgs.txt \
+			dnf history userinstalled >> "${_datadir}"/installs/dnf.txt \
 				&& printf "${_good}%s${_rset}\n" "collected Fedora packages" \
 				|| exit 1
-			flatpak list --app >> "${_datadir}"/flatpaks.txt \
+			flatpak list --app >> "${_datadir}"/installs/flatpak.txt \
 				&& printf "${_good}%s${_rset}\n" "collected Flatpaks packages" \
 				|| exit 1
 		fi
 	elif [ "${OS}" = "Darwin" ] ; then
 		if command -v mas > /dev/null ; then
-			mas list > "${_datadir}"/mascli_installs.txt \
+			mas list > "${_datadir}"/installs/mascli.txt \
 			&& printf "${_good}%s${_rset}\n" "mas installs collected" \
 			|| exit 1
 		fi
@@ -135,7 +135,7 @@ collect_installs() {
 		printf "${_fail}%s${_rset}\n" "OS is unknown. No packages collected."
 	fi
 	if command -v brew > /dev/null ; then
-		brew bundle dump --force --file="${_datadir}"/Brewfile \
+		brew bundle dump --force --file="${_datadir}"/installs/Brewfile \
 			&& printf "${_good}%s${_rset}\n" "Brewfile created" \
 			|| exit 1
 	fi
